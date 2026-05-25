@@ -1,0 +1,83 @@
+from,to
+lmms-lab/ai2d,AI2D
+HuggingFaceH4/aime_2024,AIME 2024
+MathArena/aime_2025,AIME 2025
+MathArena/aime_2026,AIME 2026
+facebook/anli,ANLI
+arcprize/arc_agi_v1_public_eval,ARC-AGI
+arcprize/arc_agi_v2_public_eval,Arc-AGI 2
+allenai/ai2_arc,ARC AI2
+lmarena-ai/arena-hard-auto,Arena-Hard
+maveriq/bigbenchhard,BBH
+BBEH/bbeh,BBEH
+gorilla-llm/Berkeley-Function-Calling-Leaderboard,BFCL V3
+smolagents/browse_comp,BrowseComp
+ceval/ceval-exam,C-EVAL
+lmms-lab/ChartQA,ChartQA
+princeton-nlp/CharXiv,CharXiv-R
+lmlmcat/cmmlu,CMMLU
+tasksource/commonsense_qa_2.0,CSQA2
+cruxeval-org/cruxeval,Crux O
+muset-ai/DeepResearch-Bench-Dataset,DeepResearch Bench
+lmms-lab/DocVQA,DocVQA
+ucinlp/drop,Drop
+evalplus/humanevalplus,Eval Plus
+google/FACTS-grounding-public,Facts Grounding
+google/fleurs,Fleurs
+Idavidrein/gpqa,GPQA
+fingertap/GPQA-Diamond,GPQA diamond
+openai/gsm8k,GSM8K
+gso-bench/gso,GSO-Bench
+Rowan/hellaswag,Hellaswag
+cais/hle,Humanitys Last Exam
+openai/openai_humaneval,HumanEval
+evalplus/humanevalplus,HumanEval+
+google/IFEval,IfEval
+google/IFEval,IfEval strict
+CohereLabs/include-base-44,INCLUDE
+EleutherAI/lambada_openai,LAMBADA
+livebench/language,LiveBench 24-08-31
+livebench/language,LiveBench 24-11-25
+livecodebench/code_generation_lite,LiveCodeBench v1
+livecodebench/code_generation_lite,LiveCodeBench v4
+livecodebench/code_generation_lite,LiveCodeBench v5
+DigitalLearningGmbH/MATH-lighteval,MATH
+HuggingFaceH4/MATH-500,MATH 500
+MathLLMs/MathVision,MathVision
+AI4Math/MathVista,MATHvista
+google-research-datasets/mbpp,MBPP
+evalplus/mbppplus,MBPP+
+ScaleAI/MCP-Atlas,MCP Atlas
+juletxara/mgsm,MGSM
+MathArena/hmmt_feb_2026,HMMT Feb 2026
+cais/mmlu,MMLU
+TIGER-Lab/MMLU-Pro,MMLU-pro
+edinburgh-dawg/mmlu-redux,MMLU-redux
+TIGER-Lab/MMLU-STEM,MMLU-stem
+openai/MMMLU,MMMLU
+MMMU/MMMU,MMMU
+MMMU/MMMU_Pro,MMMU-pro
+facebook/Multi-IF,Multi-IF
+nuprl/MultiPL-E,MultiPL-E
+allenai/openbookqa,OpenbookQA
+ybisk/piqa,PIQA
+Qwen/PolyMath,PolyMath
+derek-thomas/ScienceQA,ScienceQA
+lmms-lab/ScreenSpot-Pro,ScreenSpot Pro
+basicv8vc/SimpleQA,SimpleQA
+google/simpleqa-verified,SimpleQA
+m-a-p/SuperGPQA,SuperGPQA
+aps/super_glue,SuperGLUE
+SWE-bench/SWE-bench_Verified,SWE-Bench Verified
+ScaleAI/SWE-bench_Pro,SWE-Bench Pro
+lmms-lab/textvqa,TextVQA
+TIGER-Lab/TheoremQA,TheoremQA
+mandarjoshi/trivia_qa,TriviaQA
+domenicrosati/TruthfulQA,TruthfulQA
+camelCase12/vpct-1,VPCT
+lmms-lab/Video-MME,VideoMME
+lmms-lab/VideoMMMU,VideoMMMU
+swiss-ai/mlogiqa,MLogiQA
+allenai/winogrande,Winogrande
+allenai/ZebraLogicBench,ZebraLogic
+MixEval/MixEval,MixEval

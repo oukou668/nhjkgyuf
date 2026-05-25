@@ -1,0 +1,192 @@
+﻿id,Model,Version release date,Hugging Face developer id,Link,Notes,benchmarks/runs,Display name,Unique display name
+Qwen3-235B-A22B-Instruct,,2025-05-15,Qwen,https://huggingface.co/Qwen/Qwen3-235B-A22B-Instruct/tree/main,,,,
+Qwen3-0.6B,,2025-05-15,Qwen,,,,,
+Qwen3-1.7B,,2025-05-15,Qwen,,,,,
+Qwen3-4B,,2025-05-15,Qwen,,,,,
+Qwen3-8B,,2025-05-15,Qwen,,,,,
+Qwen3-14B,,2025-05-15,Qwen,,,,,
+Qwen3-235B-A22B-Thinking,,2025-05-15,Qwen,,,,,Qwen3-235B-A22B (Thinking)
+Qwen3-0.6B-Thinking,,2025-05-15,Qwen,,,,,Qwen3-0.6B (Thinking)
+Qwen3-1.7B-Thinking,,2025-05-15,Qwen,,,,,Qwen3-1.7B (Thinking)
+Qwen3-4B-Thinking,,2025-05-15,Qwen,,,,,Qwen3-4B (Thinking)
+Qwen3-8B-Thinking,,2025-05-15,Qwen,,,,,Qwen3-8B (Thinking)
+Qwen3-14B-Thinking,,2025-05-15,Qwen,,,,,Qwen3-14B (Thinking)
+Qwen3-32B-Thinking,,2025-05-15,Qwen,,,,,Qwen3-32B (Thinking)
+Qwen3-30B-A3B-Thinking,,2025-05-15,Qwen,,,,,Qwen3-30B-A3B (Thinking)
+Qwen1.5-1.8B,,2024-05-05,Qwen,,,,,
+Qwen1.5-72B,,2024-05-05,Qwen,,,,,
+Qwen1.5-110B,,2024-05-05,Qwen,,,,,
+Qwen1.5-0.5B-Chat,,2024-05-05,Qwen,,,,,
+Qwen1.5-1.8B-Chat,,2024-05-05,Qwen,,,,,
+Qwen2-0.5B,,2024-09-10,Qwen,,,,,
+Qwen2-1.5B,,2024-09-10,Qwen,,,,,
+Qwen2-7B,,2024-09-10,Qwen,,,,,
+Qwen2-72B,,2024-09-10,Qwen,,,,,
+Qwen2-57B-A14B,,2024-09-10,Qwen,,,,,
+Qwen2-0.5B-Instruct,,2024-09-10,Qwen,,,,,
+Qwen2-1.5B-Instruct,,2024-09-10,Qwen,,,,,
+Qwen2-57BA14B-Instruct,,2024-09-10,Qwen,,,,,
+Qwen2.5-0.5B,,2024-01-06,Qwen,,,,,
+Qwen2.5-1.5B,,2024-01-06,Qwen,,,,,
+Qwen2.5-3B,,2024-01-06,Qwen,,,,,
+Qwen2.5-7B,,2024-01-06,Qwen,,,,,
+Qwen2.5-14B,,2024-01-06,Qwen,,,,,
+Qwen2.5-32B,,2024-01-06,Qwen,,,,,
+Qwen2.5-Plus,,2024-01-06,Qwen,,,,,
+Qwen2.5-Turbo,,2024-01-06,Qwen,,,,,
+Qwen2.5-0.5B-Instruct,,2024-01-06,Qwen,,,,,
+Qwen2.5-1.5B-Instruct,,2024-01-06,Qwen,,,,,
+Qwen2.5-3B-Instruct,,2024-01-06,Qwen,,,,,
+Qwen2.5-Plus-Instruct,,2024-01-06,Qwen,,,,,
+Qwen2.5-Turbo-Instruct,,2024-01-06,Qwen,,,,,
+Qwen2.5-VL-7B-Instruct,Qwen2.5-7B,2024-09-19,Qwen,https://huggingface.co/Qwen/Qwen2.5-VL-7B-Instruct,,,,Qwen2.5-VL-7B
+Qwen2.5-VL-32B-Instruct,Qwen2.5-32B,2024-09-19,Qwen,https://huggingface.co/Qwen/Qwen2.5-VL-32B-Instruct,,,,Qwen2.5-VL-32B
+Qwen2.5-Omni-7B,,2025-03-31,Qwen,,,,,
+Qwen3-Next-80B-A3B-Instruct,,2025-09-12,Qwen,,,,,
+Qwen3-Next-80B-A3B-Thinking,,2025-09-12,Qwen,,,,,
+Qwen3-VL-4B-Instruct,,2025-10-22,Qwen,,,,,
+Qwen3-VL-8B-Instruct,,2025-10-22,Qwen,,,,,
+Qwen3-VL-32B-Instruct,,2025-10-22,Qwen,,,,,
+Qwen3-VL-30B-A3B-Instruct,,2025-10-22,Qwen,,,,,
+Qwen3-VL-235B-A22B-Instruct,,2025-10-22,Qwen,,,,,
+Qwen3-VL-4B-Thinking,,2025-10-22,Qwen,,,,,
+Qwen3-VL-8B-Thinking,,2025-10-22,Qwen,,,,,
+Qwen3-VL-32B-Thinking,,2025-10-22,Qwen,,,,,
+Qwen3-VL-30B-A3B-Thinking,,2025-10-22,Qwen,,,,,
+Qwen3-VL-235B-A22B-Thinking,,2025-10-22,Qwen,,,,,
+Qwen3.5-0.8B,,2025-10-22,Qwen,,,,,
+Qwen3.5-2B,,2025-10-22,Qwen,,,,,
+Qwen3.5-4B,,2025-10-22,Qwen,,,,,
+Qwen3.5-9B,,2025-10-22,Qwen,,,,,
+Qwen3.5-27B,,2025-10-22,Qwen,,,,,
+Qwen3.5-35B-A3B,,2025-10-22,Qwen,,,,,
+Qwen3.5-122B-A10B,,2025-10-22,Qwen,,,,,
+Qwen3.5-397B-A17B,,2025-10-22,Qwen,,,,,
+Qwen3.6-35B-A3B,,2025-10-22,Qwen,,,,,
+Qwen3.6-Plus,,2026-04-02,Qwen,,,,,
+LongCat-Flash-Lite,,2025-09-01,meituan-longcat,,,,,
+LongCat-Flash-Chat,,2025-09-01,meituan-longcat,,,,,
+LongCat-Flash-Thinking,,2025-09-01,meituan-longcat,,,,,
+Kimi-K2-Base,,2025-07-12,moonshotai,https://huggingface.co/moonshotai/Kimi-K2-Base,,,,
+Kimi-K2.5,,2026-01-27,moonshotai,https://huggingface.co/moonshotai/Kimi-K2.5,,,,
+Kimi-K2.5_thinking,,2026-01-27,moonshotai,https://huggingface.co/moonshotai/Kimi-K2.5,,,,
+Llama-3.1-8B,Llama 3.1-8B,2024-07-23,meta-llama,https:///huggingface.co/meta-llama/Llama-3.1-8B,,,,
+Llama-3.1-70B,Llama 3.1-8B,2024-07-23,meta-llama,https:///huggingface.co/meta-llama/Llama-3.1-70B,,,,
+Llama-4-Maverick-17B-128E,Llama 4 Maverick,2025-04-05,meta-llama,,,,,
+Llama-4-Scout-17B-16E,Llama 4 Scout,2025-04-05,meta-llama,,,,,
+gemma-2-2b-it,,2024-06-24,google,https://huggingface.co/google/gemma-2-2b-it,,,,
+gemma-3-1b-pt,,2025-03-12,google,https://huggingface.co/google/gemma-3-1b-pt,,,,
+gemma-3-4b-pt,,2025-03-12,google,https://huggingface.co/google/gemma-3-4b-pt,,,,
+gemma-3-12b-pt,,2025-03-12,google,https://huggingface.co/google/gemma-3-12b-pt,,,,
+gemma-3-27b-pt,,2025-03-12,google,https://huggingface.co/google/gemma-3-27b-pt,,,,
+gemma-3n-E2B-it-litert-preview,,2025-06-03,google,https://huggingface.co/google/gemma-3n-E2B-it-litert-preview,,,,
+gemma-3n-E2B-it,,2025-06-03,google,https://huggingface.co/google/gemma-3n-E2B-it,,,,
+gemma-3n-E4B-it-litert-preview,,2025-06-03,google,https://huggingface.co/google/gemma-3n-E4B-it-litert-preview,,,,
+gemma-3n-E4B-it,,2025-06-03,google,https://huggingface.co/google/gemma-3n-E4B-it,,,,
+Gemini 1.0 Ultra,,2023-12-06,google,,,,,
+MiniCPM3-4B,,2024-04-9,google,https://huggingface.co/openbmb/MiniCPM3-4B,,,,
+MiniMax-M1-40K,MiniMax-M1-40K,2025-06-13,MiniMaxAI,,,,,
+MiniMax-M2,MiniMax-M2,2025-10-27,MiniMaxAI,,,,,
+MiniMax-M2.1,MiniMax-M2.1,2026-02-13,MiniMaxAI,,,,,
+MiniMax-M2.5,MiniMax-M2.5,2026-03-10,MiniMaxAI,,,,,
+MiniMax-M2.7,MiniMax-M2.7,2026-04-13,MiniMaxAI,,,,,
+Phi-4-mini-instruct,Phi 4 Mini,2025-02-30,microsoft,,,,,
+Phi-4-mini-reasoning,Phi 4 Mini,2025-04-30,microsoft,,,,,
+Yi-1.5-9B-Chat,Yi-1.5-9B,2024-05-13,01-ai,https://huggingface.co/01-ai/Yi-1.5-9B-Chat,,,,Yi-1.5-34B
+nemotron-4-340b-Base,Nemotron-4 340B,2024-06-14,nvidia,https://huggingface.co/nvidia/Nemotron-4-340B-Base,,,,
+deepseek-vl2,DeepSeek VL2,2024-12-13,deepseek-ai,https://huggingface.co/deepseek-ai/deepseek-vl2,,,,
+deepseek-vl2-small,DeepSeek VL2,2024-12-13,deepseek-ai,https://huggingface.co/deepseek-ai/deepseek-vl2-small,,,,
+deepseek-vl2-tiny,DeepSeek VL2,2024-12-13,deepseek-ai,https://huggingface.co/deepseek-ai/deepseek-vl2-tiny,,,,
+claude-opus-4-7_adaptive_low,Claude Opus 4.7,2026-04-16,,https://platform.claude.com/docs/en/about-claude/models/overview,,,Claude Opus 4.7(low),Claude Opus 4.7(low)
+claude-opus-4-7_adaptive_medium,Claude Opus 4.7,2026-04-16,,https://platform.claude.com/docs/en/about-claude/models/overview,,,Claude Opus 4.7(medium),Claude Opus 4.7(medium)
+claude-opus-4-7_adaptive_high,Claude Opus 4.7,2026-04-16,,https://platform.claude.com/docs/en/about-claude/models/overview,default,,Claude Opus 4.7(high),Claude Opus 4.7(high)
+claude-opus-4-7_adaptive_xhigh,Claude Opus 4.7,2026-04-16,,https://platform.claude.com/docs/en/about-claude/models/overview,,,Claude Opus 4.7(xhigh),Claude Opus 4.7(xhigh)
+claude-opus-4-7_adaptive_max,Claude Opus 4.7,2026-04-16,,https://platform.claude.com/docs/en/about-claude/models/overview,,,Claude Opus 4.7(max),Claude Opus 4.7(max)
+claude-sonnet-4-6_low,Claude Sonnet 4.6,2026-02-17,,https://platform.claude.com/docs/en/about-claude/models/overview,,,Claude Sonnet 4.6(low),Claude Sonnet 4.6(low)
+claude-sonnet-4-6_medium,Claude Sonnet 4.6,2026-02-17,,https://platform.claude.com/docs/en/about-claude/models/overview,,,Claude Sonnet 4.6(medium),Claude Sonnet 4.6(medium)
+claude-sonnet-4-6_high,Claude Sonnet 4.6,2026-02-17,,https://platform.claude.com/docs/en/about-claude/models/overview,default,,Claude Sonnet 4.6(high),Claude Sonnet 4.6(high)
+claude-sonnet-4-6_max,Claude Sonnet 4.6,2026-02-17,,https://platform.claude.com/docs/en/about-claude/models/overview,,,Claude Sonnet 4.6(max),Claude Sonnet 4.6(max)
+claude-sonnet-4-6_adaptive_max,Claude Sonnet 4.6,2026-02-17,,https://platform.claude.com/docs/en/about-claude/models/overview,,,Claude Sonnet 4.6(max),Claude Sonnet 4.6(max)
+claude-opus-4-6_low,Claude Opus 4.6,2026-02-05,,https://platform.claude.com/docs/en/about-claude/models/overview,,,Claude Opus 4.6(low),Claude Opus 4.6(low)
+claude-opus-4-6_medium,Claude Opus 4.6,2026-02-05,,https://platform.claude.com/docs/en/about-claude/models/overview,,,Claude Opus 4.6(medium),Claude Opus 4.6(medium)
+claude-opus-4-6_high,Claude Opus 4.6,2026-02-05,,https://platform.claude.com/docs/en/about-claude/models/overview,,,Claude Opus 4.6(high),Claude Opus 4.6(high)
+claude-opus-4-6_max,Claude Opus 4.6,2026-02-05,,https://platform.claude.com/docs/en/about-claude/models/overview,,,Claude Opus 4.6(max),Claude Opus 4.6(max)
+claude-opus-4-6_adaptive_max,Claude Opus 4.6,2026-02-05,,https://platform.claude.com/docs/en/about-claude/models/overview,,,Claude Opus 4.6(max),Claude Opus 4.6(max)
+claude-opus-4-5-20251101_low,Claude Opus 4.5,2025-11-24,,https://platform.claude.com/docs/en/about-claude/models/overview,,,Claude Opus 4.5(low),Claude Opus 4.5(low)
+claude-opus-4-5-20251101_medium,Claude Opus 4.5,2025-11-24,,https://platform.claude.com/docs/en/about-claude/models/overview,,,Claude Opus 4.5(medium),Claude Opus 4.5(medium)
+claude-opus-4-5-20251101_high,Claude Opus 4.5,2025-11-24,,https://platform.claude.com/docs/en/about-claude/models/overview,,,Claude Opus 4.5(high),Claude Opus 4.5(high)
+claude-opus-4-5-20251101_64K_high,Claude Opus 4.5,2025-11-24,,https://platform.claude.com/docs/en/about-claude/models/overview,,,Claude Opus 4.5(high),Claude Opus 4.5(high)
+Claude Mythos Preview,Claude Mythos Preview,2026-05-05,,https://platform.claude.com/docs/en/about-claude/models/overview,,,,
+gpt-5.5_xhigh,GPT-5.5,2026-04-28,,https://developers.openai.com/api/docs/models/gpt-5.5,,,GPT-5.5 (xhigh),GPT-5.5 (xhigh)
+gpt-5.4-pro-2026-03-05_medium,GPT-5.4 pro,2026-03-05,,https://developers.openai.com/api/docs/models/gpt-5.4-pro,,,GPT-5.4 pro(medium),GPT-5.4 pro(medium)
+gpt-5.4-pro-2026-03-05_high,GPT-5.4 pro,2026-03-05,,https://developers.openai.com/api/docs/models/gpt-5.4-pro,,,GPT-5.4 pro(high),GPT-5.4 pro(high)
+gpt-5.4-pro-2026-03-05_xhigh,GPT-5.4 pro,2026-03-05,,https://developers.openai.com/api/docs/models/gpt-5.4-pro,,,GPT-5.4 pro(xhigh),GPT-5.4 pro(xhigh)
+gpt-5.4-2026-03-05_none,GPT-5.4,2026-03-05,,https://developers.openai.com/api/docs/models/gpt-5.4,default,,GPT-5.4(none),GPT-5.4(none)
+gpt-5.4-2026-03-05_low,GPT-5.4,2026-03-05,,https://developers.openai.com/api/docs/models/gpt-5.4,,,GPT-5.4(low),GPT-5.4(low)
+gpt-5.4-2026-03-05_medium,GPT-5.4,2026-03-05,,https://developers.openai.com/api/docs/models/gpt-5.4,,,GPT-5.4(medium),GPT-5.4(medium)
+gpt-5.4-2026-03-05_high,GPT-5.4,2026-03-05,,https://developers.openai.com/api/docs/models/gpt-5.4,,,GPT-5.4(high),GPT-5.4(high)
+gpt-5.4-2026-03-05_xhigh,GPT-5.4,2026-03-05,,https://developers.openai.com/api/docs/models/gpt-5.4,,,GPT-5.4(xhigh),GPT-5.4(xhigh)
+gpt-5.4-mini-2026-03-17,GPT-5.4 mini,2026-03-17,,https://developers.openai.com/api/docs/models/gpt-5.4-mini,,,GPT-5.4 mini,GPT-5.4 mini
+gpt-5.4-mini-2026-03-17_none,GPT-5.4 Mini,2026-03-05,,https://developers.openai.com/api/docs/models/gpt-5.4,default,,GPT-5.4(none),GPT-5.4(none)
+gpt-5.4-mini-2026-03-17_low,GPT-5.4 Mini,2026-03-05,,https://developers.openai.com/api/docs/models/gpt-5.4,,,GPT-5.4(low),GPT-5.4(low)
+gpt-5.4-mini-2026-03-17_medium,GPT-5.4 Mini,2026-03-05,,https://developers.openai.com/api/docs/models/gpt-5.4,,,GPT-5.4(medium),GPT-5.4(medium)
+gpt-5.4-mini-2026-03-17_high,GPT-5.4 Mini,2026-03-05,,https://developers.openai.com/api/docs/models/gpt-5.4,,,GPT-5.4(high),GPT-5.4(high)
+gpt-5.4-mini-2026-03-17_xhigh,GPT-5.4 Mini,2026-03-05,,https://developers.openai.com/api/docs/models/gpt-5.4,,,GPT-5.4(xhigh),GPT-5.4(xhigh)
+gpt-5.4-nano-2026-03-17,GPT-5.4 nano,2026-03-17,,https://developers.openai.com/api/docs/models/gpt-5.4-nano,,,GPT-5.4 nano,GPT-5.4 nano
+gpt-5.4-nano-2026-03-17_none,GPT-5.4 Nano,2026-03-05,,https://developers.openai.com/api/docs/models/gpt-5.4,default,,GPT-5.4(none),GPT-5.4(none)
+gpt-5.4-nano-2026-03-17_low,GPT-5.4 Nano,2026-03-05,,https://developers.openai.com/api/docs/models/gpt-5.4,,,GPT-5.4(low),GPT-5.4(low)
+gpt-5.4-nano-2026-03-17_medium,GPT-5.4 Nano,2026-03-05,,https://developers.openai.com/api/docs/models/gpt-5.4,,,GPT-5.4(medium),GPT-5.4(medium)
+gpt-5.4-nano-2026-03-17_high,GPT-5.4 Nano,2026-03-05,,https://developers.openai.com/api/docs/models/gpt-5.4,,,GPT-5.4(high),GPT-5.4(high)
+gpt-5.4-nano-2026-03-17_xhigh,GPT-5.4 Nano,2026-03-05,,https://developers.openai.com/api/docs/models/gpt-5.4,,,GPT-5.4(xhigh),GPT-5.4(xhigh)
+gpt-5.2_none,GPT-5.2,2025-12-11,,https://developers.openai.com/api/docs/models/gpt-5.2,default,,GPT-5.2(none),GPT-5.2(none)
+gpt-5.2_low,GPT-5.2,2025-12-11,,https://developers.openai.com/api/docs/models/gpt-5.2,,,GPT-5.2(low),GPT-5.2(low)
+gpt-5.2_medium,GPT-5.2,2025-12-11,,https://developers.openai.com/api/docs/models/gpt-5.2,,,GPT-5.2(medium),GPT-5.2(medium)
+gpt-5.2_high,GPT-5.2,2025-12-11,,https://developers.openai.com/api/docs/models/gpt-5.2,,,GPT-5.2(high),GPT-5.2(high)
+gpt-5.2_xhigh,GPT-5.2,2025-12-11,,https://developers.openai.com/api/docs/models/gpt-5.2,,,GPT-5.2(xhigh),GPT-5.2(xhigh)
+gpt-5.2-pro_medium,GPT-5.2 pro,2025-12-11,,https://developers.openai.com/api/docs/models/gpt-5.2-pro,,,GPT-5.2 pro(medium),GPT-5.2 pro(medium)
+gpt-5.2-pro_high,GPT-5.2 pro,2025-12-11,,https://developers.openai.com/api/docs/models/gpt-5.2-pro,,,GPT-5.2 pro(high),GPT-5.2 pro(high)
+gpt-5.2-pro_xhigh,GPT-5.2 pro,2025-12-11,,https://developers.openai.com/api/docs/models/gpt-5.2-pro,,,GPT-5.2 pro(xhigh),GPT-5.2 pro(xhigh)
+gpt-5.1_low,GPT-5.1,2025-11-13,,,,,,
+gpt-5.1,GPT-5.1,2025-11-13,,,,,,
+gpt-5-2025-08-07_minimal,GPT-5,2025-08-07,,,,,,
+gemini-3-pro-preview_high,,2025-11-18,,https://docs.cloud.google.com/vertex-ai/generative-ai/docs/models/gemini/3-pro,,,,
+gemini-3.1-flash-image-preview,Gemini 3.1 Flash Image,2026-02-26,,https://ai.google.dev/gemini-api/docs/gemini-3?hl=zh-cn,,,Gemini 3.1 Flash Image,Gemini 3.1 Flash Image
+gemini-3.1-pro-preview_low,Gemini 3.1 Pro,2026-02-19,,https://ai.google.dev/gemini-api/docs/gemini-3?hl=zh-cn,,,Gemini 3.1 Pro(low),Gemini 3.1 Pro(low)
+gemini-3-pro-image-preview,Gemini 3 Pro,2025-11-18,,https://ai.google.dev/gemini-api/docs/gemini-3?hl=zh-cn,,,Gemini 3 Pro,Gemini 3 Pro
+gemini-3.1-pro-preview_medium,Gemini 3.1 Pro,2026-02-19,,https://ai.google.dev/gemini-api/docs/gemini-3?hl=zh-cn,,,Gemini 3.1 Pro(medium),Gemini 3.1 Pro(medium)
+gemini-3.1-pro-preview_high,Gemini 3.1 Pro,2026-02-19,,https://ai.google.dev/gemini-api/docs/gemini-3?hl=zh-cn,default,,Gemini 3.1 Pro(high),Gemini 3.1 Pro(high)
+gemini-3.1-flash-lite-preview_minimal,Gemini 3.1 Flash-Lite,2026-03-03,,https://ai.google.dev/gemini-api/docs/gemini-3?hl=zh-cn,default,,Gemini 3.1 Flash-Lite(minimal),Gemini 3.1 Flash-Lite(minimal)
+gemini-3.1-flash-lite-preview_low,Gemini 3.1 Flash-Lite,2026-03-03,,https://ai.google.dev/gemini-api/docs/gemini-3?hl=zh-cn,,,Gemini 3.1 Flash-Lite(low),Gemini 3.1 Flash-Lite(low)
+gemini-3.1-flash-lite-preview_medium,Gemini 3.1 Flash-Lite,2026-03-03,,https://ai.google.dev/gemini-api/docs/gemini-3?hl=zh-cn,,,Gemini 3.1 Flash-Lite(medium),Gemini 3.1 Flash-Lite(medium)
+gemini-3.1-flash-lite-preview_high,Gemini 3.1 Flash-Lite,2026-03-03,,https://ai.google.dev/gemini-api/docs/gemini-3?hl=zh-cn,,,Gemini 3.1 Flash-Lite(high),Gemini 3.1 Flash-Lite(high)
+gemini-3-flash-preview_minimal,Gemini 3 Flash,2025-12-17,,https://ai.google.dev/gemini-api/docs/gemini-3?hl=zh-cn,,,Gemini 3 Flash(minimal),Gemini 3 Flash(minimal)
+gemini-3-flash-preview_low,Gemini 3 Flash,2025-12-17,,https://ai.google.dev/gemini-api/docs/gemini-3?hl=zh-cn,,,Gemini 3 Flash(low),Gemini 3 Flash(low)
+gemini-3-flash-preview_medium,Gemini 3 Flash,2025-12-17,,https://ai.google.dev/gemini-api/docs/gemini-3?hl=zh-cn,,,Gemini 3 Flash(medium),Gemini 3 Flash(medium)
+gemini-3-flash-preview_high,Gemini 3 Flash,2025-12-17,,https://ai.google.dev/gemini-api/docs/gemini-3?hl=zh-cn,default,,Gemini 3 Flash(high),Gemini 3 Flash(high)
+grok-4.20-0309-reasoning,Grok 4.20,2026-03-09,,https://console.x.ai/team/f8152e63-322b-4146-a8c8-d53c43f2504c/models,,,Grok 4.20 reasoning,Grok 4.20 reasoning
+grok-4.20-0309-non-reasoning,Grok 4.20,2026-03-09,,https://console.x.ai/team/f8152e63-322b-4146-a8c8-d53c43f2504c/models,,,Grok 4.20 non-reasoning,Grok 4.20 non-reasoning
+grok-4.20-multi-agent-0309,Grok 4.20,2026-03-09,,https://console.x.ai/team/f8152e63-322b-4146-a8c8-d53c43f2504c/models,,,Grok 4.20 multi-agent,Grok 4.20 multi-agent
+grok-4-1-fast-reasoning,Grok 4.1,2025-11-17,,https://console.x.ai/team/f8152e63-322b-4146-a8c8-d53c43f2504c/models,,,Grok 4.1 Fast reasoning,Grok 4.1 Fast reasoning
+grok-4-1-fast-non-reasoning,Grok 4.1,2025-11-17,,https://console.x.ai/team/f8152e63-322b-4146-a8c8-d53c43f2504c/models,,,Grok 4.1 Fast non-reasoning,Grok 4.1 Fast non-reasoning
+Mistral-7B-v0.2,Mistral 7b,2023-10-10,mistralai,,,,,
+mistral-small-2603,Mistral Small 4,2026-03-16,mistralai,https://docs.mistral.ai/models/overview,,,Mistral Small 4,Mistral Small 4
+mistral-large-2512,Mistral Large 3,2025-12-02,mistralai,https://docs.mistral.ai/models/overview,,,Mistral Large 3,Mistral Large 3
+ministral-14b-2512,Ministral 3 14B,2025-12-02,mistralai,https://docs.mistral.ai/models/overview,,,Ministral 3 14B,Ministral 3 14B
+ministral-8b-2512,Ministral 3 8B,2025-12-02,mistralai,https://docs.mistral.ai/models/overview,,,Ministral 3 8B,Ministral 3 8B
+ministral-3b-2512,Ministral 3 3B,2025-12-02,mistralai,https://docs.mistral.ai/models/overview,,,Ministral 3 3B,Ministral 3 3B
+magistral-medium-2509,Magistral Medium 1.2,2025-09-18,mistralai,https://docs.mistral.ai/models/overview,,,Magistral Medium 1.2,Magistral Medium 1.2
+magistral-small-2509,Magistral Small 1.2,2025-09-18,mistralai,https://docs.mistral.ai/models/overview,,,Magistral Small 1.2,Magistral Small 1.2
+gpt-5.2-codex,GPT-5.2-Codex,2025-12-18,,https://developers.openai.com/api/docs/models/gpt-5.2-codex,,,GPT-5.2-Codex,GPT-5.2-Codex
+gpt-5.3-codex,GPT-5.3-Codex,2026-02-05,,https://developers.openai.com/api/docs/models/gpt-5.3-codex,,,GPT-5.3-Codex,GPT-5.3-Codex
+gemini-3.1-pro-preview-customtools,Gemini 3.1 Pro Preview customtools,2026-02-19,,https://ai.google.dev/gemini-api/docs/models/gemini-3.1-pro-preview,customtools,,Gemini 3.1 Pro Preview customtools,Gemini 3.1 Pro Preview customtools
+mistral-small-2506,Mistral Small 3.2,2025-06-20,,https://docs.mistral.ai/resources/changelogs,,,Mistral Small 3.2,Mistral Small 3.2
+devstral-2512,Devstral 2,2025-12-09,,https://docs.mistral.ai/resources/changelogs,,,Devstral 2,Devstral 2
+kimi-k2.6,Kimi K2.6,2026-04-20,,https://platform.kimi.ai/docs/api/models-overview,,,Kimi K2.6,Kimi K2.6
+kimi-k2.6_thinking,Kimi K2.6,2026-04-20,,https://platform.kimi.ai/docs/api/models-overview,,,Kimi K2.6,Kimi K2.6
+o1-2024-12-17,o1,2024-12-17,OpenAI,early o1 released performance. mainly uploaded by openai. no resoning effort.,,,,
+GLM-4.7,GLM-4.7,2025-12-23,zai-org,https://huggingface.co/zai-org/GLM-4.7,MoE 358B total ~32B active,,,
+GLM-4.7-Flash,GLM-4.7,2026-01-19,zai-org,https://huggingface.co/zai-org/GLM-4.7-Flash,MoE 30B total ~3B active,,,
+GLM-5,GLM-5,2026-02-12,zai-org,https://huggingface.co/zai-org/GLM-5,MoE 744B total ~40B active,,,
+DeepSeek-V3.2_thinking,DeepSeek-V3.2,2026-01-10,deepseek-ai,https://huggingface.co/deepseek-ai/DeepSeek-V3.2,MoE 671B total ~37B active,,,
+DeepSeek-V4-Pro-Max,DeepSeek-V4-Pro,2026-04-24,deepseek-ai,https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro,MoE 1.6T total ~49B active,,,
+DeepSeek-V4-Flash-Max,DeepSeek-V4-Flash,2026-04-24,deepseek-ai,https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash,MoE 284B total ~13B active,,,

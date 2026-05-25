@@ -1,0 +1,118 @@
+benchmark,coding: writing code,math: solving  math problems,planning,commensense: ,logic: pure logic QA,reasoning,visual,video,tools,agent: agent capability (not ,science,physics,knowledge,multiplechoice,instructionfollowing,multilingual,safety,game,writing,longtext,textunderstanding
+Aider polyglot,1,FALSE,0,0,0,1,0,,,0,0,,0,0,1,0,0,0,0,0,0
+ANLI,FALSE,FALSE,0,0,0,1,0,,,0,0,,0,1,1,0,0,0,0,0,0
+ARC AI2,FALSE,FALSE,0,0,0,1,0,,,0,1,,1,1,0,0,0,0,0,0,0
+ARC-AGI,FALSE,FALSE,0,0,1,1,0,,,0,0,,0,0,0,0,0,0,0,0,0
+Balrog,FALSE,FALSE,1,0,0,1,0,,,1,0,,0,0,0,0,0,1,0,0,0
+BBH,FALSE,FALSE,0,0,1,1,0,,0,0,0,,0,0,1,0,0,0,0,0,0
+BoolQ,FALSE,FALSE,-,,,,,,,,,,,,,,,,,,
+CadEval,1,FALSE,1,,,1,,,1,,,,1,,1,,,,,,
+CSQA2,FALSE,FALSE,-,,,,,,,,,,,,,,,,,,
+Cybench,1,FALSE,,,,1,,,,,,,,,,,1,0,,,
+DeepResearch Bench,FALSE,FALSE,1,,0,1,0,,,1,1,,1,0,1,,0,0,,,
+Factorio learning environment,1,FALSE,1,0,0,1,0,,,1,0,,0,0,1,0,0,1,,,
+Fiction.LiveBench,FALSE,FALSE,,,,,,,,,,,,,,0,,,1,1,
+FrontierMath-Tier-4-2025-07-01-Private,,1,,,,1,,,,,,,,,,,,,,,
+FrontierMath-2025-02-28-Private,FALSE,1,,,,1,,,,,,,,,,,,,,,
+GeoBench,FALSE,FALSE,,,,1,1,,,1,,,,1,,,,,,,
+GPQA diamond,FALSE,FALSE,0,0,0,1,0,,,0,1,,0,0,0,0,0,0,0,,
+GSM8K,FALSE,1,0,0,0,1,0,,,0,0,,0,0,0,0,0,0,0,,
+GSO-Bench,1,FALSE,1,0,0,1,,,,1,,,0,0,1,0,0,0,,,
+HellaSwag,FALSE,FALSE,0,1,0,1,0,,0,0,0,,1,1,,,,,0,,
+LAMBADA,FALSE,FALSE,,,,,,,,,,,,,,,,,,,1
+Lech Mazur Writing,FALSE,FALSE,,,,,,,,,,,,,,,,,1,,
+LiveBench 24-11-25,1,1,,,,1,,,,1,,,,0,1,,,,,,1
+MATH level 5,FALSE,1,,,,1,,,,,,,,,,,,,,,
+MCBench,FALSE,FALSE,,,,,,,,,,,,,,,,,,,
+MMLU,FALSE,FALSE,0,,,,0,,0,0,,,1,1,,0,0,,,,
+OpenBookQA,FALSE,FALSE,0,1,0,1,0,,0,0,1,,1,1,0,0,0,0,0,0,0
+OSUniverse,FALSE,FALSE,1,,0,1,1,,,1,0,,,0,,,0,,0,0,0
+OSWorld,FALSE,FALSE,1,,,1,1,,,1,,,,,,,,,,,
+OTIS Mock AIME 2024-2025,FALSE,1,,,0,1,,,0,0,0,,,,,,,,,,
+PIQA,FALSE,FALSE,,1,,1,,,,,1,1,1,1,,,,,,,
+ScienceQA,FALSE,FALSE,,,,1,,,,,1,,1,,,,,,,,
+SimpleBench,FALSE,FALSE,,1,,1,,,,,,,1,1,,,,,,,
+SuperGLUE,FALSE,FALSE,,1,,1,,,,,,,1,1,,,,,,,1
+SWE-Bench verified,1,FALSE,1,0,0,1,0,,,,0,,1,0,1,0,0,0,0,0,0
+Terminal Bench,1,FALSE,1,0,0,1,0,,1,1,0,,0,0,1,0,0,1,0,0,0
+The Agent Company,FALSE,FALSE,1,1,,1,,,,,,,,0,,,,,,,
+TriviaQA,FALSE,FALSE,,,,1,,,,,,,,,,,,,,1,1
+VideoMME,FALSE,FALSE,,,,,1,1,,,,,,1,,,,,,,
+VPCT,FALSE,FALSE,,,,1,1,1,,,,1,,,,,,,,,
+WeirdML,1,FALSE,1,,,1,,,,,1,,1,,,,,,,,
+Winogrande,FALSE,FALSE,,1,,1,0,,,,,,,1,0,0,0,0,0,0,1
+METR,1,FALSE,,,,,,,,,,,,,,,,,,,
+Balrog-VLM,0,0,1,0,0,1,1,,,1,0,,0,0,0,0,0,1,,,
+AIME 2024,FALSE,1,,,0,1,,,,,,,,,,,,,,,
+AIME 2025,FALSE,1,,,0,1,,,,,,,,,,,,,,,
+ARC-AGI1,FALSE,FALSE,0,0,1,1,0,,,0,0,,0,0,0,0,0,0,0,0,0
+ARC-AGI2,FALSE,FALSE,0,0,1,1,0,,,0,0,,0,0,0,0,0,0,0,0,0
+Arc-C,,,,1,,1,,,,,1,,1,1,,,,,,,
+Arena-Hard,1,1,,,,1,,,,,,,,,1,,,,1,,
+AutoLogi,,,,,1,1,,,,,,,,,,1,,,,,
+BBEH,FALSE,FALSE,0,0,1,1,0,,0,0,0,,0,0,1,0,0,0,0,0,0
+BFCL V3,1,,,,,,,,1,1,,,,,,,,,,,
+C-EVAL,,1,,,,1,,,,,1,,1,1,,1,,,,,
+CMMLU,FALSE,FALSE,0,,,,0,,0,0,,,1,1,,1,0,,,,
+CodeForces Rating,1,1,,,,1,,,,,,,,,,,,,,,
+Creative Writing v3,,,,,,1,,,,,,,,,1,,,,1,,1
+Crux O,1,,,,,1,,,,,,,,,1,,,,,,
+Eval Plus,1,0,,,,1,,,,,,,,,1,,,,,,
+GPQA,,1,,,,1,,,,,1,1,1,1,,,,,,,
+HumanEval,1,,,,,1,,,,,,,,,1,,,,,,
+HumanEval+,1,,,,,1,,,,,,,,,1,,,,,,
+INCLUDE,,1,,1,,1,,,,,1,1,1,1,,1,,,,,
+IfEval,,,,,,1,,,,,,,,,1,,,,,,
+IfEval strict,,,,,,1,,,,,,,,,1,,,,,,
+LiveCodeBench v1,1,0,1,,,1,,,,1,,,,,1,,,,,,
+LiveCodeBench v4,1,0,1,,,1,,,,1,,,,,1,,,,,,
+LiveCodeBench v5,1,0,1,,,1,,,,1,,,,,1,,,,,,
+MATH,0,1,,,,1,,,,,,,,,,,,,,,
+MATH 500,0,1,,,,1,,,,,,,,,,,,,,,
+MBPP,1,0,,,,1,,,,,,,,,,,,,,,
+MBPP+,1,0,,,,1,,,,,,,,,,,,,,,
+MGSM,,1,,,,1,,,,,,,,,,1,,,,,
+MlogiQA,,,,,1,1,,,,,,,,1,,1,,,,,
+MMLU-pro,,1,,,,1,,,,,1,1,1,1,,,,,,,
+MMLU-redux,,1,,,,1,,,,,1,1,1,1,,,,,,,
+MMLU-stem,,1,,,,1,,,,,1,1,1,1,,,,,,,
+MMMLU,,1,,,,1,,,,,1,1,1,1,,1,,,,,
+MMMLU-14-languages,,1,,,,1,,,,,1,1,1,1,,1,,,,,
+MT-AIME2024,,1,1,,,1,,,,,,,,,,,,,,,
+MixEval,1,1,,,,1,,,,,,,,,1,1,,,,,
+Multi-IF,,,1,,,1,,,,,,,,,1,1,,,,,
+MultiPL-E,1,,,,,1,,,,,,,,,1,,,,,,
+OpenBookQA,,,,1,,1,,,,,1,1,1,1,,,,,,1,
+PolyMath,,1,,,,1,,,,,,,,,,1,,,,,
+SuperGPQA,,1,,,,1,,,,,1,1,1,1,,,,,,,
+TheoremQA,,1,1,,,1,,,,,1,1,1,,,,,,,,
+TruthfulQA,,,,1,,1,,,,,,,1,1,,,1,,,,
+ZebraLogic,,,1,,1,1,,,,,,,,,,,,1,,,
+Ai2d,,,,,,1,1,,,,1,,1,1,,,,,,
+blink,,,,,,,1,,,,,,,1,,,,,,
+chartqa,,1,,,,1,1,,,,,,,,,,,,,
+code elo,1,,,,,1,,,,,,,,,,,,,,
+commonsenseqa,,,,1,,1,,,,,,,1,1,,,,,,
+docvqa,,,,,,,1,,,,,,,,,,,,,,1
+drop,,1,,,,1,,,,,,,,,,,,,1,1,
+facts grounding,,,,,,1,,,,,,,,,1,,,,1,1,1
+fleurs,,,,,,,,,,,,,,,,1,,,,
+hiddenmath,,1,,,,1,,,,,,,,,,,,,,
+mathvision,,1,,,,1,1,,,,,,,,,,,,,
+mathvista,,1,,,,1,1,,,,,,,1,,,,,,
+mmmu,,,,,,1,1,,,,,,1,1,,,,,,
+mmmu pro,,,,,,1,1,,,,,,1,1,,,,,,
+piqa,,,,1,,1,,,,,,,1,1,,,,,,
+textvqa,,,,,,1,1,,,,,,,,,,,,,,1
+video mme,,,,,,1,,1,,,,,,1,,,,,,
+
+
+
+,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,
+ARC-AGI-2,,,,,,,,,,,,,,,,,,,,,
+ARC-AGI-3,,,,,,,,,,,,,,,,,,,,,
+bbeh,,,,,,,,,,,,,,,,,,,,,
+MixEval-hard,,,,,,,,,,,,,,,1,,1,,,,
