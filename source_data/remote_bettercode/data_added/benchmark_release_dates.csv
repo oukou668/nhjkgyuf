@@ -1,0 +1,102 @@
+benchmark_name,release_date,source
+AI2D,2016-10-01,arXiv:1603.07396 (AI2 Diagrams dataset)
+AIME 2024,2024-02-01,AMC competition date
+AIME 2025,2025-02-01,AMC competition date
+AIME 2026,2026-02-01,AMC competition date
+ANLI,2019-10-01,arXiv:1910.14599
+ARC AI2,2018-03-01,arXiv:1803.05457 (ARC Challenge)
+ARC-AGI,2019-11-01,arXiv:1911.01547 (Chollet ARC)
+Aider polyglot,2024-05-01,aider.chat polyglot coding benchmark
+Arc-AGI,2019-11-01,arXiv:1911.01547 (same as ARC-AGI)
+Arc-AGI 2,2024-12-01,ARC Prize 2 announcement
+Arc-C,2018-03-01,arXiv:1803.05457 (ARC Challenge subset)
+Arena-Hard,2024-04-01,LMSYS Arena-Hard release
+AutoLogi,2025-02-24,arXiv:2502.16906
+BBH,2022-10-01,arXiv:2210.09261 (BIG-Bench Hard)
+BFCL V3,2024-11-01,Berkeley Function Calling Leaderboard V3
+Balrog,2024-11-20,arXiv:2411.13543
+BrowseComp,2025-04-10,OpenAI release
+C-EVAL,2023-05-01,arXiv:2305.08322
+CMMLU,2023-06-01,arXiv:2306.09212
+CadEval,2025-03-31,GitHub wgpatrick/cadeval repo creation
+CharXiv-R,2024-06-01,arXiv:2406.18521
+CodeForces,2023-12-01,Epoch AI first AI benchmark tracking
+Creative Writing v3,2025-01-05,lechmazur/writing GitHub (v3)
+Crux O,2024-01-05,arXiv:2401.03065 (CRUXEval)
+Cybench,2024-08-01,arXiv:2408.08926
+DeepResearch Bench,2025-06-16,arXiv:2506.11763
+DocVQA,2020-07-01,arXiv:2007.15745
+Drop,2019-03-01,arXiv:1903.00161
+Eval Plus,2023-05-01,arXiv:2305.01210 (EvalPlus)
+Factorio learning environment,2025-03-06,arXiv:2503.09617
+Facts Grounding,2024-12-17,Google DeepMind blog
+Fiction.LiveBench,2025-02-01,fiction.live benchmark first release
+Fleurs,2022-05-01,arXiv:2205.12446
+FrontierMath-2025-02-28-Private,2024-11-07,arXiv:2411.04872 (FrontierMath paper)
+FrontierMath-Tier-4-2025-07-01-Private,2024-11-07,arXiv:2411.04872 (FrontierMath paper)
+GPQA,2023-11-01,arXiv:2311.12022
+GPQA diamond,2023-11-01,arXiv:2311.12022 (GPQA diamond subset)
+GSM8K,2021-10-01,arXiv:2110.14168
+GSO-Bench,2025-05-30,GitHub gso-bench/gso and PyPI
+GeoBench,2024-11-01,arXiv:2411.19325 (GEOBench-VLM)
+HellaSwag,2019-05-01,arXiv:1905.07830
+HumanEval,2021-07-01,arXiv:2107.03374 (Codex paper)
+HumanEval+,2023-05-01,arXiv:2305.01210 (EvalPlus)
+Humanitys Last Exam,2025-01-24,arXiv:2501.14249
+INCLUDE,2024-10-01,arXiv:2410.06664
+IfEval,2023-11-01,arXiv:2311.07911
+IfEval strict,2023-11-01,arXiv:2311.07911 (same as IfEval)
+LAMBADA,2016-06-01,arXiv:1606.06031
+Lech Mazur Writing,2025-01-05,lechmazur/writing GitHub
+LiveBench 24-11-25,2024-06-01,arXiv:2406.19314 (LiveBench first release)
+LiveCodeBench v1,2024-03-01,arXiv:2403.07974
+LiveCodeBench v4,2024-03-01,arXiv:2403.07974 (LiveCodeBench framework)
+LiveCodeBench v5,2024-03-01,arXiv:2403.07974 (LiveCodeBench framework)
+MATH,2021-03-01,arXiv:2103.03874
+MATH 500,2021-03-01,arXiv:2103.03874 (MATH subset)
+MATH level 5,2021-03-01,arXiv:2103.03874 (MATH subset)
+MATHvision,2024-02-01,arXiv:2402.14804
+MATHvista,2023-10-01,arXiv:2310.02255
+MBPP,2021-08-01,arXiv:2108.07732
+MBPP+,2023-05-01,arXiv:2305.01210 (EvalPlus)
+MCP Atlas,2025-09-19,Scale AI blog post
+MGSM,2022-10-01,arXiv:2210.03057
+MLogiQA,2023-10-01,arXiv:2310.07478 (Multilingual LogiQA)
+MMLU,2020-09-01,arXiv:2009.03300
+MMLU-pro,2024-06-01,arXiv:2406.01574
+MMLU-redux,2024-06-01,arXiv:2406.04127
+MMLU-stem,2020-09-01,arXiv:2009.03300 (MMLU subset)
+MMMLU,2024-09-24,OpenAI HuggingFace release
+MMMLU-14-languages,2024-09-24,OpenAI HuggingFace release
+MMMU,2023-11-01,arXiv:2311.16502
+MMMU-pro,2024-09-01,arXiv:2409.02813
+MT-AIME2024,2024-02-01,Multilingual Translation of AIME 2024
+MixEval,2024-06-01,arXiv:2406.06565
+Multi-IF,2024-10-01,arXiv:2410.15553
+MultiPL-E,2022-08-01,arXiv:2208.08227
+OSUniverse,2025-05-06,arXiv:2505.03570
+OSWorld,2024-04-01,arXiv:2404.07972
+OTIS Mock AIME 2024-2025,2023-12-22,Evan Chen blog (OTIS Mock AIME)
+OpenBookQA,2018-09-01,arXiv:1809.02789
+PIQA,2019-11-01,arXiv:1911.11641
+PolyMath,2025-04-25,arXiv:2504.18428
+SWE Bench Pro,2025-09-19,Scale AI blog post
+SWE Bench Verified,2024-08-01,OpenAI SWE-bench Verified release
+SWE-Bench verified,2024-08-01,OpenAI SWE-bench Verified release (same)
+ScienceQA,2022-09-01,arXiv:2209.09513
+SimpleBench,2024-10-20,GitHub simple-bench/SimpleBench
+SimpleQA,2024-10-01,OpenAI SimpleQA release
+SuperGPQA,2025-02-20,arXiv:2502.14739
+Terminal Bench,2025-05-01,tbench.ai first release
+Terminal Bench 2,2025-11-07,tbench.ai Terminal-Bench 2.0 release
+TextVQA,2019-04-01,arXiv:1904.08920
+The Agent Company,2024-12-01,arXiv:2412.14161
+TheoremQA,2023-05-01,arXiv:2305.12524
+TriviaQA,2017-05-01,arXiv:1705.03551
+TruthfulQA,2021-09-01,arXiv:2109.07958
+VPCT,2025-05-24,camelCase12/vpct-runner GitHub
+VideoMME,2024-05-01,arXiv:2405.21075
+VideoMMMU,2025-01-23,arXiv:2501.13826
+WeirdML,2025-01-16,LessWrong post
+Winogrande,2019-07-01,arXiv:1907.10641
+ZebraLogic,2024-10-01,arXiv:2410.15493

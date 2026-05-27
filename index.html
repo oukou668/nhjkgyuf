@@ -55,6 +55,25 @@
             <h2>Model capability vs release date</h2>
             <span id="timelineSummary">--</span>
           </div>
+          <div class="toolbar compact-toolbar">
+            <label class="field compact">
+              <span>Timeline view</span>
+              <select id="timelineViewMode">
+                <option value="combined" selected>Model + benchmark</option>
+                <option value="models">Models only</option>
+                <option value="benchmarkTags">Benchmarks by tag</option>
+              </select>
+            </label>
+            <label class="field compact">
+              <span>Benchmark metric</span>
+              <select id="benchmarkTimelineMetric">
+                <option value="difficulty_score" selected>Predicted difficulty</option>
+                <option value="difficulty_sum">Difficulty sum</option>
+                <option value="difficulty_mean">Difficulty mean</option>
+                <option value="difficulty_l2">Difficulty L2</option>
+              </select>
+            </label>
+          </div>
           <div class="timeline-frame">
             <div class="timeline-chart">
               <canvas id="timelineCanvas" width="1200" height="560"></canvas>
@@ -251,6 +270,6 @@
       </section>
     </main>
 
-    <script src="./app.js?v=20260525-tag-detail-bars"></script>
+    <script src="./app.js?v=20260528-remote-benchmark-release-dates"></script>
   </body>
 </html>

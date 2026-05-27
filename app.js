@@ -4,6 +4,8 @@ const state = {
   selectedBenchmark: null,
   selectedRunTag: null,
   selectedFamily: "All",
+  timelineViewMode: "combined",
+  benchmarkTimelineMetric: "difficulty_score",
   timelinePoints: [],
   timelinePreviousFamily: "All",
   timelineAnimation: null,
@@ -11,6 +13,19 @@ const state = {
 };
 
 const FIXED_RUN_TAG = "extend4689_buck_meansafe_bce_corrloss_wogamma_vd=20_R=0.1_btlw=12_fold_idx3";
+const TIMELINE_START_DATE = "2023-01-01";
+const TIMELINE_START_MS = new Date(`${TIMELINE_START_DATE}T00:00:00`).getTime();
+const BENCHMARK_DIFFICULTY_METRICS = {
+  difficulty_score: { label: "Predicted difficulty", shortLabel: "predicted difficulty" },
+  difficulty_sum: { label: "Difficulty sum", shortLabel: "difficulty sum" },
+  difficulty_mean: { label: "Difficulty mean", shortLabel: "difficulty mean" },
+  difficulty_l2: { label: "Difficulty L2", shortLabel: "difficulty L2" },
+};
+const TIMELINE_VIEW_MODES = {
+  combined: "Model + benchmark",
+  models: "Models only",
+  benchmarkTags: "Benchmarks by tag",
+};
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
@@ -49,6 +64,8 @@ const els = {
   tagCards: $("#tagCards"),
   canvasFamilyLegend: $("#canvasFamilyLegend"),
   timelineSummary: $("#timelineSummary"),
+  timelineViewMode: $("#timelineViewMode"),
+  benchmarkTimelineMetric: $("#benchmarkTimelineMetric"),
   timelineCanvas: $("#timelineCanvas"),
   timelineHitLayer: $("#timelineHitLayer"),
   timelineTooltip: $("#timelineTooltip"),
@@ -129,10 +146,11 @@ const FAMILY_COLORS = {
   Claude: "#e58a2a",
   Gemini: "#3fa45b",
   DeepSeek: "#d84545",
-  Qwen: "#8f68b1",
+  Qwen: "#cdb9e8",
   GLM: "#8e5a43",
   Llama: "#d86db0",
   Kimi: "#22aeb3",
+  Benchmark: "#9fb8c9",
   Others: "#b8b8b8",
 };
 
@@ -565,6 +583,7 @@ function timelineData() {
   return activeRun().models
     .filter((model) => model.release_date)
     .map((model) => ({
+      pointType: "model",
       model: model.model,
       family: model.family,
       release_date: model.release_date,
@@ -572,11 +591,66 @@ function timelineData() {
     }));
 }
 
+function benchmarkTimelineData() {
+  return activeRun().benchmarks
+    .filter((bench) => bench.release_date)
+    .map((bench) => ({
+      pointType: "benchmark",
+      model: bench.benchmark_name,
+      family: "Benchmark",
+      release_date: bench.release_date,
+      difficulty_sum: bench.difficulty_sum,
+      difficulty_mean: bench.difficulty_mean,
+      difficulty_l2: bench.difficulty_l2,
+      difficulty_score: bench.difficulty_score,
+      predicted_pass_mean: bench.predicted_pass_mean,
+      tags: bench.tags || [],
+      tag_scores: bench.tag_scores || {},
+    }));
+}
+
+function benchmarkTimelineMetric() {
+  const key = state.benchmarkTimelineMetric;
+  return BENCHMARK_DIFFICULTY_METRICS[key] ? key : "difficulty_score";
+}
+
+function benchmarkTimelineMetricLabel() {
+  return BENCHMARK_DIFFICULTY_METRICS[benchmarkTimelineMetric()].shortLabel;
+}
+
+function timelineViewMode() {
+  return TIMELINE_VIEW_MODES[state.timelineViewMode] ? state.timelineViewMode : "combined";
+}
+
+function dominantBenchmarkTag(point) {
+  const scores = point.tag_scores || {};
+  const scoredTag = Object.entries(scores)
+    .filter(([, score]) => Number(score) > 0)
+    .sort((a, b) => Number(b[1]) - Number(a[1]))[0];
+  if (scoredTag) return scoredTag[0];
+  return (point.tags || [])[0] || "untagged";
+}
+
+function metricColor(value, min, max) {
+  const t = max === min ? 0.5 : clamp((value - min) / (max - min), 0, 1);
+  const low = [87, 132, 165];
+  const mid = [236, 225, 203];
+  const high = [188, 82, 79];
+  const [a, b, mix] = t < 0.5
+    ? [low, mid, t / 0.5]
+    : [mid, high, (t - 0.5) / 0.5];
+  const rgb = a.map((channel, index) => Math.round(channel + (b[index] - channel) * mix));
+  return `rgb(${rgb.join(",")})`;
+}
+
 function familyCounts() {
-  return timelineData().reduce((counts, point) => {
-    counts[point.family] = (counts[point.family] || 0) + 1;
-    return counts;
-  }, {});
+  return [...timelineData(), ...benchmarkTimelineData()]
+    .map((point) => ({ ...point, dateMs: new Date(`${point.release_date}T00:00:00`).getTime() }))
+    .filter((point) => Number.isFinite(point.dateMs) && point.dateMs >= TIMELINE_START_MS)
+    .reduce((counts, point) => {
+      counts[point.family] = (counts[point.family] || 0) + 1;
+      return counts;
+    }, {});
 }
 
 function renderCanvasFamilyLegend() {
@@ -584,7 +658,9 @@ function renderCanvasFamilyLegend() {
   const counts = familyCounts();
   els.canvasFamilyLegend.innerHTML = families
     .map((family) => {
-      const count = family === "All" ? timelineData().length : counts[family];
+      const count = family === "All"
+        ? Object.values(counts).reduce((sum, value) => sum + value, 0)
+        : counts[family];
       const color = family === "All" ? "#1d2528" : FAMILY_COLORS[family] || FAMILY_COLORS.Others;
       return `
         <button class="legend-button ${state.selectedFamily === family ? "active" : ""}" type="button" data-family="${escapeHtml(family)}">
@@ -703,16 +779,32 @@ function animateTimelineIntro() {
 }
 
 function renderTimeline(animation = null) {
-  const allPoints = timelineData();
-  const scaledPoints = allPoints
+  const metricKey = benchmarkTimelineMetric();
+  const metricLabel = benchmarkTimelineMetricLabel();
+  const mode = timelineViewMode();
+  const modelPoints = timelineData()
     .map((point) => ({ ...point, dateMs: new Date(`${point.release_date}T00:00:00`).getTime() }))
     .filter((point) => Number.isFinite(point.dateMs) && Number.isFinite(point.capability_sum))
+    .filter((point) => point.dateMs >= TIMELINE_START_MS)
     .sort((a, b) => a.dateMs - b.dateMs);
-  const points = scaledPoints.filter((point) => timelineVisibleFor(point, state.selectedFamily));
+  const benchmarkPoints = benchmarkTimelineData()
+    .map((point) => ({
+      ...point,
+      dateMs: new Date(`${point.release_date}T00:00:00`).getTime(),
+      metricValue: Number(point[metricKey]),
+    }))
+    .filter((point) => Number.isFinite(point.dateMs) && Number.isFinite(point.metricValue))
+    .filter((point) => point.dateMs >= TIMELINE_START_MS)
+    .sort((a, b) => a.dateMs - b.dateMs);
+  const visibleModels = mode === "benchmarkTags" ? [] : modelPoints.filter((point) => timelineVisibleFor(point, state.selectedFamily));
+  const visibleBenchmarks = mode === "models"
+    ? []
+    : benchmarkPoints.filter((point) => mode === "benchmarkTags" || timelineVisibleFor(point, state.selectedFamily));
+  const xPoints = [...modelPoints, ...benchmarkPoints];
   const isIntroAnimation = animation?.kind === "intro";
-  const drawPoints = isIntroAnimation
-    ? points.map((point, index) => {
-        const stagger = points.length > 1 ? (index / (points.length - 1)) * 0.58 : 0;
+  const drawModelPoints = isIntroAnimation
+    ? visibleModels.map((point, index) => {
+        const stagger = visibleModels.length > 1 ? (index / (visibleModels.length - 1)) * 0.58 : 0;
         const pointProgress = smoothTimelineEase(clamp((animation.progress - stagger) / 0.42, 0, 1));
         const display = timelineDisplayFor(point, state.selectedFamily);
         return {
@@ -725,7 +817,7 @@ function renderTimeline(animation = null) {
         };
       })
     : animation
-    ? scaledPoints.map((point) => {
+    ? modelPoints.map((point) => {
         const fromDisplay = timelineDisplayFor(point, animation.fromFamily);
         const toDisplay = timelineDisplayFor(point, animation.toFamily);
         const focusLevel = (fromDisplay.focused ? 1 : 0) + ((toDisplay.focused ? 1 : 0) - (fromDisplay.focused ? 1 : 0)) * animation.progress;
@@ -737,7 +829,7 @@ function renderTimeline(animation = null) {
           timelineBaseAlpha: 0.28 + focusLevel * 0.62,
         };
       })
-    : scaledPoints.map((point) => {
+    : modelPoints.map((point) => {
         const display = timelineDisplayFor(point, state.selectedFamily);
         return {
           ...point,
@@ -747,49 +839,75 @@ function renderTimeline(animation = null) {
           timelineBaseAlpha: display.alpha,
         };
       });
+  const drawBenchmarkPoints = visibleBenchmarks.map((point) => ({
+    ...point,
+    timelineAlpha: isIntroAnimation ? smoothTimelineEase(clamp((animation.progress - 0.2) / 0.6, 0, 1)) : 1,
+    timelineActive: true,
+    timelineColor: FAMILY_COLORS.Benchmark,
+    timelineBaseAlpha: 0.82,
+  }));
 
-  els.timelineSummary.textContent = `${points.length} / ${allPoints.length} models · ${state.selectedFamily}`;
+  els.timelineSummary.textContent = `${TIMELINE_VIEW_MODES[mode]} · ${visibleModels.length} models · ${visibleBenchmarks.length} benchmarks`;
   const { ctx, width, height } = canvasSetup(els.timelineCanvas);
   ctx.clearRect(0, 0, width, height);
 
-  if (!scaledPoints.length || !points.length) {
+  if ((!visibleModels.length && !visibleBenchmarks.length) || !xPoints.length) {
     ctx.fillStyle = "#697176";
     ctx.font = "14px system-ui";
     ctx.textAlign = "center";
-    ctx.fillText("No dated models for this family.", width / 2, height / 2);
+    ctx.fillText("No dated points from 2023 onward for this view.", width / 2, height / 2);
     return;
   }
 
-  const pad = { left: 64, right: 190, top: 112, bottom: 54 };
-  const minX = Math.min(...scaledPoints.map((point) => point.dateMs));
-  const maxX = Math.max(...scaledPoints.map((point) => point.dateMs));
-  const minYRaw = Math.min(...scaledPoints.map((point) => point.capability_sum));
-  const maxYRaw = Math.max(...scaledPoints.map((point) => point.capability_sum));
+  const pad = { left: 70, right: 38, top: 82, bottom: 58 };
+  const minX = TIMELINE_START_MS;
+  const maxX = Math.max(...xPoints.map((point) => point.dateMs));
+  const modelValueSource = visibleModels.length ? visibleModels : modelPoints;
+  const minYRaw = Math.min(...modelValueSource.map((point) => point.capability_sum));
+  const maxYRaw = Math.max(...modelValueSource.map((point) => point.capability_sum));
   const yPad = Math.max(1, (maxYRaw - minYRaw) * 0.12);
   const minY = Math.floor(minYRaw - yPad);
   const maxY = Math.ceil(maxYRaw + yPad);
   const xSpan = maxX - minX || 1;
   const ySpan = maxY - minY || 1;
-  const axisRight = width - 24;
-  const plotW = width - pad.left - pad.right;
+  const axisRight = width - pad.right;
+  const plotW = axisRight - pad.left;
   const plotH = height - pad.top - pad.bottom;
-  const axisW = axisRight - pad.left;
+  const eventBandHeight = mode === "combined" ? 116 : 0;
+  const modelTop = pad.top + 16;
+  const modelBottom = mode === "combined" ? height - pad.bottom - eventBandHeight : height - pad.bottom;
+  const modelH = modelBottom - modelTop;
+  const eventTop = modelBottom + 18;
+  const eventBottom = height - pad.bottom;
+  const eventH = eventBottom - eventTop;
   const xScale = (value) => pad.left + ((value - minX) / xSpan) * plotW;
-  const yScale = (value) => pad.top + (1 - (value - minY) / ySpan) * plotH;
+  const yScale = (value) => modelTop + (1 - (value - minY) / ySpan) * modelH;
+
+  const benchValues = benchmarkPoints.map((point) => point.metricValue).filter(Number.isFinite);
+  const hasBenchAxis = benchValues.length > 0;
+  const benchMinRaw = hasBenchAxis ? Math.min(...benchValues) : 0;
+  const benchMaxRaw = hasBenchAxis ? Math.max(...benchValues) : 1;
+  const benchPad = Math.max(1, (benchMaxRaw - benchMinRaw) * 0.12);
+  const benchMin = benchMinRaw - benchPad;
+  const benchMax = benchMaxRaw + benchPad;
+  const benchSpan = benchMax - benchMin || 1;
+  const eventYScale = (value) => eventBottom - ((value - benchMin) / benchSpan) * Math.max(12, eventH - 28);
 
   ctx.strokeStyle = "#e1dacf";
   ctx.lineWidth = 1;
   ctx.fillStyle = "#697176";
   ctx.font = "12px system-ui";
   ctx.textAlign = "right";
-  for (let i = 0; i <= 5; i += 1) {
-    const value = minY + (ySpan * i) / 5;
-    const y = yScale(value);
-    ctx.beginPath();
-    ctx.moveTo(pad.left, y);
-    ctx.lineTo(axisRight, y);
-    ctx.stroke();
-    ctx.fillText(fmt(value, 1), pad.left - 10, y + 4);
+  if (mode !== "benchmarkTags") {
+    for (let i = 0; i <= 5; i += 1) {
+      const value = minY + (ySpan * i) / 5;
+      const y = yScale(value);
+      ctx.beginPath();
+      ctx.moveTo(pad.left, y);
+      ctx.lineTo(axisRight, y);
+      ctx.stroke();
+      ctx.fillText(fmt(value, 1), pad.left - 10, y + 4);
+    }
   }
 
   ctx.textAlign = "center";
@@ -797,7 +915,7 @@ function renderTimeline(animation = null) {
   const maxYear = new Date(maxX).getFullYear();
   for (let year = minYear; year <= maxYear; year += 1) {
     const x = xScale(new Date(`${year}-01-01T00:00:00`).getTime());
-    if (x < pad.left || x > width - pad.right) continue;
+    if (x < pad.left || x > axisRight) continue;
     ctx.beginPath();
     ctx.moveTo(x, pad.top);
     ctx.lineTo(x, height - pad.bottom);
@@ -807,13 +925,27 @@ function renderTimeline(animation = null) {
 
   ctx.strokeStyle = "#1d2528";
   ctx.beginPath();
-  ctx.moveTo(pad.left, pad.top);
+  ctx.moveTo(pad.left, mode === "benchmarkTags" ? pad.top : modelTop);
   ctx.lineTo(pad.left, height - pad.bottom);
   ctx.lineTo(axisRight, height - pad.bottom);
   ctx.stroke();
 
+  if (mode === "combined") {
+    ctx.fillStyle = "rgba(159, 184, 201, 0.13)";
+    ctx.fillRect(pad.left, eventTop - 10, plotW, eventH + 16);
+    ctx.strokeStyle = "#9fb8c9";
+    ctx.beginPath();
+    ctx.moveTo(pad.left, eventTop - 10);
+    ctx.lineTo(axisRight, eventTop - 10);
+    ctx.stroke();
+    ctx.fillStyle = "#5e7e92";
+    ctx.font = "12px system-ui";
+    ctx.textAlign = "left";
+    ctx.fillText(`Benchmark events · color/height = ${metricLabel}`, pad.left + 8, eventTop + 6);
+  }
+
   let bestCapability = -Infinity;
-  const sortedByDate = drawPoints.filter((point) => point.timelineActive).slice().sort((a, b) => a.dateMs - b.dateMs);
+  const sortedByDate = drawModelPoints.filter((point) => point.timelineActive).slice().sort((a, b) => a.dateMs - b.dateMs);
   sortedByDate.forEach((point) => {
     if (point.capability_sum > bestCapability) {
       point.isTopLayer = true;
@@ -821,51 +953,131 @@ function renderTimeline(animation = null) {
     }
   });
 
-  drawPoints.forEach((point) => {
-    const x = xScale(point.dateMs);
-    const y = yScale(point.capability_sum) + (point.timelineRise || 0);
-    const baseRadius = point.isTopLayer ? 4.2 : 3.4;
-    const radius = baseRadius * (0.76 + point.timelineAlpha * 0.24);
-    point.canvasX = x;
-    point.canvasY = y;
-    point.canvasRadius = radius;
-    ctx.fillStyle = point.timelineColor || FAMILY_COLORS[point.family] || FAMILY_COLORS.Others;
-    ctx.globalAlpha = (point.timelineBaseAlpha ?? 0.9) * point.timelineAlpha;
-    ctx.beginPath();
-    ctx.arc(x, y, radius, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.globalAlpha = 1;
-    const label = timelineLabelFor(point, state.selectedFamily);
-    if (label && point.timelineAlpha > 0.72) {
-      ctx.fillStyle = "#697176";
-      ctx.globalAlpha = point.timelineAlpha;
-      ctx.font = "10px system-ui";
-      ctx.textAlign = "left";
-      ctx.fillText(label, x + 6, y - 5);
+  if (mode !== "benchmarkTags") {
+    drawModelPoints.forEach((point) => {
+      const x = xScale(point.dateMs);
+      const y = yScale(point.capability_sum) + (point.timelineRise || 0);
+      const baseRadius = point.isTopLayer ? 4.2 : 3.4;
+      const radius = baseRadius * (0.76 + point.timelineAlpha * 0.24);
+      point.canvasX = x;
+      point.canvasY = y;
+      point.canvasRadius = radius;
+      ctx.fillStyle = point.timelineColor || FAMILY_COLORS[point.family] || FAMILY_COLORS.Others;
+      ctx.globalAlpha = (point.timelineBaseAlpha ?? 0.9) * point.timelineAlpha;
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.fill();
       ctx.globalAlpha = 1;
-    }
-  });
+      const label = timelineLabelFor(point, state.selectedFamily);
+      if (label && point.timelineAlpha > 0.72) {
+        ctx.fillStyle = "#697176";
+        ctx.globalAlpha = point.timelineAlpha;
+        ctx.font = "10px system-ui";
+        ctx.textAlign = "left";
+        ctx.fillText(label, x + 6, y - 5);
+        ctx.globalAlpha = 1;
+      }
+    });
+  }
+
+  if (mode === "combined" && hasBenchAxis) {
+    drawBenchmarkPoints.forEach((point) => {
+      const x = xScale(point.dateMs);
+      const y = eventYScale(point.metricValue);
+      const radius = 3.4;
+      point.canvasX = x;
+      point.canvasY = y;
+      point.canvasRadius = 9;
+      ctx.strokeStyle = "rgba(95, 126, 146, 0.34)";
+      ctx.beginPath();
+      ctx.moveTo(x, eventBottom);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(Math.PI / 4);
+      ctx.fillStyle = metricColor(point.metricValue, benchMinRaw, benchMaxRaw);
+      ctx.globalAlpha = point.timelineBaseAlpha * point.timelineAlpha;
+      ctx.fillRect(-radius, -radius, radius * 2, radius * 2);
+      ctx.restore();
+      ctx.globalAlpha = 1;
+    });
+  }
+
+  if (mode === "benchmarkTags" && hasBenchAxis) {
+    const laneCounts = new Map();
+    drawBenchmarkPoints.forEach((point) => {
+      point.timelineTag = dominantBenchmarkTag(point);
+      laneCounts.set(point.timelineTag, (laneCounts.get(point.timelineTag) || 0) + 1);
+    });
+    const lanes = [...laneCounts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 8)
+      .map(([tag]) => tag);
+    const laneSet = new Set(lanes);
+    const finalLanes = [...lanes, "Other"];
+    const laneTop = pad.top + 18;
+    const laneBottom = height - pad.bottom - 8;
+    const laneStep = (laneBottom - laneTop) / Math.max(1, finalLanes.length - 1);
+    ctx.font = "11px system-ui";
+    finalLanes.forEach((tag, index) => {
+      const y = laneTop + index * laneStep;
+      ctx.strokeStyle = "#e1dacf";
+      ctx.beginPath();
+      ctx.moveTo(pad.left, y);
+      ctx.lineTo(axisRight, y);
+      ctx.stroke();
+      ctx.fillStyle = "#697176";
+      ctx.textAlign = "right";
+      ctx.fillText(tag.slice(0, 20), pad.left - 10, y + 4);
+    });
+    drawBenchmarkPoints.forEach((point) => {
+      const tag = laneSet.has(point.timelineTag) ? point.timelineTag : "Other";
+      const laneIndex = finalLanes.indexOf(tag);
+      const x = xScale(point.dateMs);
+      const y = laneTop + laneIndex * laneStep;
+      const radius = 3.8 + clamp((point.metricValue - benchMinRaw) / (benchMaxRaw - benchMinRaw || 1), 0, 1) * 2.2;
+      point.canvasX = x;
+      point.canvasY = y;
+      point.canvasRadius = 10;
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(Math.PI / 4);
+      ctx.fillStyle = metricColor(point.metricValue, benchMinRaw, benchMaxRaw);
+      ctx.globalAlpha = 0.9;
+      ctx.fillRect(-radius, -radius, radius * 2, radius * 2);
+      ctx.restore();
+    });
+  }
 
   ctx.fillStyle = "#1d2528";
   ctx.font = "12px system-ui";
   ctx.textAlign = "center";
-  ctx.fillText("Release date", pad.left + axisW / 2, height - 12);
-  ctx.save();
-  ctx.translate(18, pad.top + plotH / 2);
-  ctx.rotate(-Math.PI / 2);
-  ctx.fillText("Capability sum", 0, 0);
-  ctx.restore();
+  ctx.fillText("Release date", pad.left + plotW / 2, height - 12);
+  if (mode !== "benchmarkTags") {
+    ctx.save();
+    ctx.translate(20, modelTop + modelH / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillText("Model capability sum", 0, 0);
+    ctx.restore();
+  }
 
-  const hitPoints = animation?.animating ? [] : drawPoints.filter((point) => point.timelineActive);
+  const hitPoints = animation?.animating ? [] : [
+    ...(mode === "benchmarkTags" ? [] : drawModelPoints.filter((point) => point.timelineActive)),
+    ...drawBenchmarkPoints,
+  ];
   state.timelinePoints = hitPoints;
   renderTimelineHitLayer(hitPoints);
 }
 
 function showTimelineTooltip(point, x, y) {
   els.timelineTooltip.hidden = false;
+  const detail = point.pointType === "benchmark"
+    ? `Benchmark · ${escapeHtml(point.release_date)} · ${benchmarkTimelineMetricLabel()} ${fmt(point.metricValue, 3)} · ${escapeHtml(dominantBenchmarkTag(point))}`
+    : `${escapeHtml(point.family)} · ${escapeHtml(point.release_date)} · capability ${fmt(point.capability_sum, 3)}`;
   els.timelineTooltip.innerHTML = `
     <strong>${escapeHtml(point.model)}</strong>
-    <span>${escapeHtml(point.family)} · ${escapeHtml(point.release_date)} · capability ${fmt(point.capability_sum, 3)}</span>
+    <span>${detail}</span>
   `;
   const frame = els.timelineCanvas.getBoundingClientRect();
   els.timelineTooltip.style.left = `${clamp(x + 14, 10, frame.width - 320)}px`;
@@ -1072,6 +1284,22 @@ function bindEvents() {
   [els.modelSearch, els.modelSort, els.modelLimit].forEach((el) => el.addEventListener("input", renderModels));
   [els.benchmarkSearch, els.benchmarkSort, els.tagFilter].forEach((el) => el.addEventListener("input", renderBenchmarks));
   [els.heatmapType, els.heatmapLimit].forEach((el) => el.addEventListener("input", renderHeatmap));
+  els.timelineViewMode.addEventListener("input", () => {
+    if (state.timelineAnimation) cancelAnimationFrame(state.timelineAnimation);
+    state.timelineAnimation = null;
+    state.timelineIntroPlayed = true;
+    state.timelineViewMode = els.timelineViewMode.value;
+    hideTimelineTooltip();
+    renderTimeline();
+  });
+  els.benchmarkTimelineMetric.addEventListener("input", () => {
+    if (state.timelineAnimation) cancelAnimationFrame(state.timelineAnimation);
+    state.timelineAnimation = null;
+    state.timelineIntroPlayed = true;
+    state.benchmarkTimelineMetric = els.benchmarkTimelineMetric.value;
+    hideTimelineTooltip();
+    renderTimeline();
+  });
   els.timelineCanvas.addEventListener("mousemove", handleTimelinePointerMove);
   els.timelineCanvas.addEventListener("mouseleave", hideTimelineTooltip);
   window.addEventListener("resize", () => {
@@ -1083,7 +1311,7 @@ function bindEvents() {
 }
 
 async function init() {
-  const response = await fetch("./data/dashboard_data.json?v=20260522-benchlook-heatmap");
+  const response = await fetch("./data/dashboard_data.json?v=20260528-remote-benchmark-release-dates");
   if (!response.ok) throw new Error(`Failed to load dashboard_data.json: ${response.status}`);
   state.data = await response.json();
   populateControls();

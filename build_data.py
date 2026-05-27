@@ -89,6 +89,11 @@ TAG_SCORES_CSV = REMOTE_SOURCE_ROOT / "data_added" / "benchmarks_tags_rubric_coa
 TAG_ACTIVITY_CSV = REMOTE_SOURCE_ROOT / "tag_activity_stats.csv"
 TAG_STATS_JSON = REMOTE_SOURCE_ROOT / "tagging_benchmark_tag_stats.json"
 RUBRICS_JSON = REMOTE_SOURCE_ROOT / "rubrics.json"
+BENCHMARK_OPTIM_CSV = ROOT / "data" / "benchmark_optim.csv"
+BENCHMARK_RELEASE_DATES_EXTRA_CSV = ROOT / "meta-eval-dashboard" / "source_data" / "benchmark_release_dates_extra.csv"
+REMOTE_BENCHMARK_RELEASE_DATES_CSV = (
+    REMOTE_SOURCE_ROOT / "data_added" / "benchmark_release_dates.csv"
+)
 MODEL_VERSION_FILES = [
     REMOTE_SOURCE_ROOT / "data" / "model_versions.csv",
     ROOT / "data" / "model_versions.csv",
@@ -275,6 +280,69 @@ def load_model_release_dates() -> dict[str, str]:
     release_dates: dict[str, str] = {}
     for model_name, date in sorted(release_rows, key=lambda item: item[1]):
         release_dates.setdefault(model_name, date.strftime("%Y-%m-%d"))
+    return release_dates
+
+
+def load_benchmark_release_dates() -> dict[str, str]:
+    release_dates: dict[str, str] = {}
+    if BENCHMARK_OPTIM_CSV.exists():
+        df = pd.read_csv(BENCHMARK_OPTIM_CSV)
+        if "benchmark" in df.columns and "benchmark_release_date" in df.columns:
+            for _, row in df.iterrows():
+                name = row.get("benchmark")
+                date = pd.to_datetime(row.get("benchmark_release_date"), errors="coerce")
+                if pd.isna(name) or pd.isna(date):
+                    continue
+                text_name = str(name)
+                formatted = date.strftime("%Y-%m-%d")
+                release_dates.setdefault(text_name, formatted)
+                release_dates.setdefault(normalize_name(text_name), formatted)
+
+    if BENCHMARK_RELEASE_DATES_EXTRA_CSV.exists():
+        extra_df = pd.read_csv(BENCHMARK_RELEASE_DATES_EXTRA_CSV)
+        if "benchmark" in extra_df.columns and "release_date" in extra_df.columns:
+            for _, row in extra_df.iterrows():
+                name = row.get("benchmark")
+                date = pd.to_datetime(row.get("release_date"), errors="coerce")
+                if pd.isna(name) or pd.isna(date):
+                    continue
+                text_name = str(name).strip()
+                if not text_name:
+                    continue
+                formatted = date.strftime("%Y-%m-%d")
+                release_dates[text_name] = formatted
+                release_dates[normalize_name(text_name)] = formatted
+
+    if REMOTE_BENCHMARK_RELEASE_DATES_CSV.exists():
+        remote_df = pd.read_csv(REMOTE_BENCHMARK_RELEASE_DATES_CSV)
+        if "benchmark_name" in remote_df.columns and "release_date" in remote_df.columns:
+            for _, row in remote_df.iterrows():
+                name = row.get("benchmark_name")
+                date = pd.to_datetime(row.get("release_date"), errors="coerce")
+                if pd.isna(name) or pd.isna(date):
+                    continue
+                text_name = str(name).strip()
+                if not text_name:
+                    continue
+                formatted = date.strftime("%Y-%m-%d")
+                release_dates[text_name] = formatted
+                release_dates[normalize_name(text_name)] = formatted
+
+    alias_to_source = {
+        "Arc-C": "ARC AI2",
+        "GPQA": "GPQA diamond",
+        "LiveBench 24-08-31": "LiveBench",
+        "LiveBench 24-11-25": "LiveBench",
+        "MATH": "MATH level 5",
+        "OpenbookQA": "OpenBookQA",
+        "SWE-Bench Verified": "SWE-Bench verified",
+    }
+    for alias, source in alias_to_source.items():
+        source_date = release_dates.get(source) or release_dates.get(normalize_name(source))
+        if not source_date:
+            continue
+        release_dates.setdefault(alias, source_date)
+        release_dates.setdefault(normalize_name(alias), source_date)
     return release_dates
 
 
@@ -466,6 +534,7 @@ def build_benchmarks_for_run(
     benches_df: pd.DataFrame,
     tag_lookup: dict[str, list[str]],
     tag_score_lookup: dict[str, dict[str, float]],
+    release_dates: dict[str, str],
 ) -> list[dict[str, Any]]:
     benchmarks = []
     for _, row in benches_df.iterrows():
@@ -479,6 +548,7 @@ def build_benchmarks_for_run(
             {
                 "benchmark_id": row["benchmark_id"],
                 "benchmark_name": name,
+                "release_date": release_dates.get(name) or release_dates.get(normalize_name(name)),
                 "estimated_difficulty": difficulty,
                 "difficulty_sum": stats["sum"],
                 "difficulty_mean": stats["mean"],
@@ -539,8 +609,9 @@ def build_run_payload(run: dict[str, Any], tag_columns: list[str], include_tag_p
     benches_df = pd.read_csv(run["bench_csv"])
     tag_lookup, tag_score_lookup, _ = load_tags()
     release_dates = load_model_release_dates()
+    benchmark_release_dates = load_benchmark_release_dates()
     models = build_models_for_run(models_df, release_dates, tag_columns)
-    benchmarks = build_benchmarks_for_run(benches_df, tag_lookup, tag_score_lookup)
+    benchmarks = build_benchmarks_for_run(benches_df, tag_lookup, tag_score_lookup, benchmark_release_dates)
     run_r_match = re.search(r"(?:^|_)R=([0-9.]+)", run["run_tag"])
     add_predicted_difficulty_scores(models, benchmarks, float(run_r_match.group(1)) if run_r_match else 0.1)
 
@@ -559,10 +630,11 @@ def build_run_payload(run: dict[str, Any], tag_columns: list[str], include_tag_p
 def build_core_payload() -> dict[str, Any]:
     tag_lookup, tag_score_lookup, tag_columns = load_tags()
     release_dates = load_model_release_dates()
+    benchmark_release_dates = load_benchmark_release_dates()
     models_df = pd.read_csv(MODEL_CSV)
     benches_df = pd.read_csv(BENCH_CSV)
     models = build_models_for_run(models_df, release_dates, tag_columns)
-    benchmarks = build_benchmarks_for_run(benches_df, tag_lookup, tag_score_lookup)
+    benchmarks = build_benchmarks_for_run(benches_df, tag_lookup, tag_score_lookup, benchmark_release_dates)
     add_predicted_difficulty_scores(models, benchmarks, R_VALUE)
 
     dim_count = len(models[0]["estimated_capability"]) if models else 0
