@@ -10,6 +10,8 @@ const state = {
   timelinePreviousFamily: "All",
   timelineAnimation: null,
   timelineIntroPlayed: false,
+  heroActive: true,
+  heroReadyAt: 0,
 };
 
 const FIXED_RUN_TAG = "extend4689_buck_meansafe_bce_corrloss_wogamma_vd=20_R=0.1_btlw=12_fold_idx3";
@@ -26,6 +28,7 @@ const TIMELINE_VIEW_MODES = {
   models: "Models only",
   benchmarkTags: "Benchmarks by tag",
 };
+const HERO_EXIT_ARM_DELAY = 700;
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
@@ -778,7 +781,42 @@ function animateTimelineIntro() {
   state.timelineAnimation = requestAnimationFrame(step);
 }
 
+function removeHeroExitListeners() {
+  window.removeEventListener("wheel", handleHeroExit);
+  window.removeEventListener("pointermove", handleHeroExit);
+  window.removeEventListener("keydown", handleHeroExit);
+}
+
+function exitHeroMode() {
+  if (!state.heroActive || !document.body.classList.contains("hero-mode")) return;
+  state.heroActive = false;
+  removeHeroExitListeners();
+  document.body.classList.add("hero-exiting");
+  hideTimelineTooltip();
+  window.setTimeout(() => {
+    document.body.classList.remove("hero-mode", "hero-exiting");
+    window.scrollTo(0, 0);
+    renderTimeline();
+  }, 170);
+}
+
+function handleHeroExit(event) {
+  if (!state.heroActive || Date.now() < state.heroReadyAt) return;
+  if (event.type === "wheel") event.preventDefault();
+  exitHeroMode();
+}
+
+function enableHeroMode() {
+  state.heroActive = true;
+  state.heroReadyAt = Date.now() + HERO_EXIT_ARM_DELAY;
+  document.body.classList.add("hero-mode");
+  window.addEventListener("wheel", handleHeroExit, { passive: false });
+  window.addEventListener("pointermove", handleHeroExit);
+  window.addEventListener("keydown", handleHeroExit);
+}
+
 function renderTimeline(animation = null) {
+  const isHeroMode = document.body.classList.contains("hero-mode");
   const metricKey = benchmarkTimelineMetric();
   const metricLabel = benchmarkTimelineMetricLabel();
   const mode = timelineViewMode();
@@ -859,7 +897,12 @@ function renderTimeline(animation = null) {
     return;
   }
 
-  const pad = { left: 70, right: 38, top: 82, bottom: 58 };
+  const pad = {
+    left: isHeroMode ? 94 : 70,
+    right: isHeroMode ? 52 : 38,
+    top: isHeroMode ? 88 : 82,
+    bottom: isHeroMode ? 94 : 58,
+  };
   const minX = TIMELINE_START_MS;
   const maxX = Math.max(...xPoints.map((point) => point.dateMs));
   const modelValueSource = visibleModels.length ? visibleModels : modelPoints;
@@ -1053,7 +1096,7 @@ function renderTimeline(animation = null) {
   ctx.fillStyle = "#1d2528";
   ctx.font = "12px system-ui";
   ctx.textAlign = "center";
-  ctx.fillText("Release date", pad.left + plotW / 2, height - 12);
+  ctx.fillText("Release date", pad.left + plotW / 2, isHeroMode ? height - 58 : height - 12);
   if (mode !== "benchmarkTags") {
     ctx.save();
     ctx.translate(20, modelTop + modelH / 2);
@@ -1311,12 +1354,13 @@ function bindEvents() {
 }
 
 async function init() {
-  const response = await fetch("./data/dashboard_data.json?v=20260528-remote-benchmark-release-dates");
+  const response = await fetch("./data/dashboard_data.json?v=20260528-hero-timeline");
   if (!response.ok) throw new Error(`Failed to load dashboard_data.json: ${response.status}`);
   state.data = await response.json();
   populateControls();
   hydrateStats();
   bindEvents();
+  enableHeroMode();
   renderModels();
   renderBenchmarks();
   renderCanvasFamilyLegend();
