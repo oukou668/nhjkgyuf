@@ -541,6 +541,11 @@ def build_benchmarks_for_run(
         difficulty = parse_vector(row["estimated_difficulty"])
         mask = parse_vector(row["mask"]) if "mask" in row else []
         weights = softmax(mask) if mask else []
+        weighted_difficulty = (
+            float(np.dot(np.asarray(difficulty, dtype=np.float64), np.asarray(weights, dtype=np.float64)))
+            if difficulty and weights and len(difficulty) == len(weights)
+            else None
+        )
         stats = vector_stats(difficulty)
         name = str(row["benchmark_name"])
         tag_scores = tag_score_lookup.get(name) or tag_score_lookup.get(normalize_name(name)) or {}
@@ -550,6 +555,7 @@ def build_benchmarks_for_run(
                 "benchmark_name": name,
                 "release_date": release_dates.get(name) or release_dates.get(normalize_name(name)),
                 "estimated_difficulty": difficulty,
+                "difficulty_weighted": weighted_difficulty,
                 "difficulty_sum": stats["sum"],
                 "difficulty_mean": stats["mean"],
                 "difficulty_l2": stats["l2"],

@@ -5,7 +5,7 @@ const state = {
   selectedRunTag: null,
   selectedFamily: "All",
   timelineViewMode: "combined",
-  benchmarkTimelineMetric: "difficulty_score",
+  benchmarkTimelineMetric: "difficulty_weighted",
   timelinePoints: [],
   timelinePreviousFamily: "All",
   timelineAnimation: null,
@@ -19,6 +19,7 @@ const FIXED_RUN_TAG = "extend4689_buck_meansafe_bce_corrloss_wogamma_vd=20_R=0.1
 const TIMELINE_START_DATE = "2023-01-01";
 const TIMELINE_START_MS = new Date(`${TIMELINE_START_DATE}T00:00:00`).getTime();
 const BENCHMARK_DIFFICULTY_METRICS = {
+  difficulty_weighted: { label: "Difficulty × mask", shortLabel: "sum(difficulty * softmax(mask))" },
   difficulty_score: { label: "Predicted difficulty", shortLabel: "predicted difficulty" },
   difficulty_sum: { label: "Difficulty sum", shortLabel: "difficulty sum" },
   difficulty_mean: { label: "Difficulty mean", shortLabel: "difficulty mean" },
@@ -604,6 +605,7 @@ function benchmarkTimelineData() {
       family: "Benchmark",
       release_date: bench.release_date,
       difficulty_sum: bench.difficulty_sum,
+      difficulty_weighted: bench.difficulty_weighted,
       difficulty_mean: bench.difficulty_mean,
       difficulty_l2: bench.difficulty_l2,
       difficulty_score: bench.difficulty_score,
@@ -615,7 +617,7 @@ function benchmarkTimelineData() {
 
 function benchmarkTimelineMetric() {
   const key = state.benchmarkTimelineMetric;
-  return BENCHMARK_DIFFICULTY_METRICS[key] ? key : "difficulty_score";
+  return BENCHMARK_DIFFICULTY_METRICS[key] ? key : "difficulty_weighted";
 }
 
 function benchmarkTimelineMetricLabel() {

@@ -67,7 +67,8 @@
             <label class="field compact">
               <span>Benchmark metric</span>
               <select id="benchmarkTimelineMetric">
-                <option value="difficulty_score" selected>Predicted difficulty</option>
+                <option value="difficulty_weighted" selected>Difficulty × mask</option>
+                <option value="difficulty_score">Predicted difficulty</option>
                 <option value="difficulty_sum">Difficulty sum</option>
                 <option value="difficulty_mean">Difficulty mean</option>
                 <option value="difficulty_l2">Difficulty L2</option>
@@ -270,6 +271,6 @@
       </section>
     </main>
 
-    <script src="./app.js?v=20260528-lazy-hero"></script>
+    <script src="./app.js?v=20260528-weighted-difficulty"></script>
   </body>
 </html>
