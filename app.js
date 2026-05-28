@@ -1022,7 +1022,7 @@ function renderTimeline(animation = null) {
   ctx.stroke();
 
   if (mode === "combined") {
-    ctx.fillStyle = "rgba(159, 184, 201, 0.13)";
+    ctx.fillStyle = "rgba(159, 184, 201, 0.10)";
     ctx.fillRect(pad.left, eventTop - 10, plotW, eventH + 16);
     ctx.strokeStyle = "#9fb8c9";
     ctx.beginPath();
@@ -1032,7 +1032,7 @@ function renderTimeline(animation = null) {
     ctx.fillStyle = "#5e7e92";
     ctx.font = "12px system-ui";
     ctx.textAlign = "left";
-    ctx.fillText(`Benchmark events · color/height = ${metricLabel}`, pad.left + 8, eventTop + 6);
+    ctx.fillText(`Benchmark events · color/vertical position = ${metricLabel}`, pad.left + 8, eventTop + 6);
   }
 
   let bestCapability = -Infinity;
@@ -1098,23 +1098,20 @@ function renderTimeline(animation = null) {
   }
 
   if (mode === "combined" && hasBenchAxis) {
-    drawBenchmarkPoints.forEach((point) => {
+    const laneOffsets = [-5, 4, -1, 7, -8, 2];
+    drawBenchmarkPoints.forEach((point, index) => {
       const x = xScale(point.dateMs);
-      const y = eventYScale(point.metricValue);
-      const radius = 3.4;
+      const y = eventYScale(point.metricValue) + laneOffsets[index % laneOffsets.length];
+      const strength = clamp((point.metricValue - benchMinRaw) / (benchMaxRaw - benchMinRaw || 1), 0, 1);
+      const radius = 3.2 + strength * 1.6;
       point.canvasX = x;
       point.canvasY = y;
       point.canvasRadius = 9;
-      ctx.strokeStyle = "rgba(95, 126, 146, 0.34)";
-      ctx.beginPath();
-      ctx.moveTo(x, eventBottom);
-      ctx.lineTo(x, y);
-      ctx.stroke();
       ctx.save();
       ctx.translate(x, y);
       ctx.rotate(Math.PI / 4);
       ctx.fillStyle = metricColor(point.metricValue, benchMinRaw, benchMaxRaw);
-      ctx.globalAlpha = point.timelineBaseAlpha * point.timelineAlpha;
+      ctx.globalAlpha = (0.58 + strength * 0.34) * point.timelineAlpha;
       ctx.fillRect(-radius, -radius, radius * 2, radius * 2);
       ctx.restore();
       ctx.globalAlpha = 1;
