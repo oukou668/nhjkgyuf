@@ -26,7 +26,7 @@ const BENCHMARK_DIFFICULTY_METRICS = {
 const TIMELINE_VIEW_MODES = {
   combined: "Model + benchmark",
   models: "Models only",
-  benchmarkTags: "Benchmarks by tag",
+  benchmarks: "Benchmarks only",
 };
 const HERO_EXIT_ARM_DELAY = 700;
 
@@ -625,15 +625,6 @@ function timelineViewMode() {
   return TIMELINE_VIEW_MODES[state.timelineViewMode] ? state.timelineViewMode : "combined";
 }
 
-function dominantBenchmarkTag(point) {
-  const scores = point.tag_scores || {};
-  const scoredTag = Object.entries(scores)
-    .filter(([, score]) => Number(score) > 0)
-    .sort((a, b) => Number(b[1]) - Number(a[1]))[0];
-  if (scoredTag) return scoredTag[0];
-  return (point.tags || [])[0] || "untagged";
-}
-
 function metricColor(value, min, max) {
   const t = max === min ? 0.5 : clamp((value - min) / (max - min), 0, 1);
   const low = [87, 132, 165];
@@ -834,10 +825,10 @@ function renderTimeline(animation = null) {
     .filter((point) => Number.isFinite(point.dateMs) && Number.isFinite(point.metricValue))
     .filter((point) => point.dateMs >= TIMELINE_START_MS)
     .sort((a, b) => a.dateMs - b.dateMs);
-  const visibleModels = mode === "benchmarkTags" ? [] : modelPoints.filter((point) => timelineVisibleFor(point, state.selectedFamily));
+  const visibleModels = mode === "benchmarks" ? [] : modelPoints.filter((point) => timelineVisibleFor(point, state.selectedFamily));
   const visibleBenchmarks = mode === "models"
     ? []
-    : benchmarkPoints.filter((point) => mode === "benchmarkTags" || timelineVisibleFor(point, state.selectedFamily));
+    : benchmarkPoints.filter((point) => mode === "benchmarks" || timelineVisibleFor(point, state.selectedFamily));
   const xPoints = [...modelPoints, ...benchmarkPoints];
   const isIntroAnimation = animation?.kind === "intro";
   const drawModelPoints = isIntroAnimation
@@ -935,13 +926,24 @@ function renderTimeline(animation = null) {
   const benchMax = benchMaxRaw + benchPad;
   const benchSpan = benchMax - benchMin || 1;
   const eventYScale = (value) => eventBottom - ((value - benchMin) / benchSpan) * Math.max(12, eventH - 28);
+  const benchMainYScale = (value) => pad.top + (1 - (value - benchMin) / benchSpan) * plotH;
 
   ctx.strokeStyle = "#e1dacf";
   ctx.lineWidth = 1;
   ctx.fillStyle = "#697176";
   ctx.font = "12px system-ui";
   ctx.textAlign = "right";
-  if (mode !== "benchmarkTags") {
+  if (mode === "benchmarks" && hasBenchAxis) {
+    for (let i = 0; i <= 5; i += 1) {
+      const value = benchMin + (benchSpan * i) / 5;
+      const y = benchMainYScale(value);
+      ctx.beginPath();
+      ctx.moveTo(pad.left, y);
+      ctx.lineTo(axisRight, y);
+      ctx.stroke();
+      ctx.fillText(fmt(value, 2), pad.left - 10, y + 4);
+    }
+  } else {
     for (let i = 0; i <= 5; i += 1) {
       const value = minY + (ySpan * i) / 5;
       const y = yScale(value);
@@ -968,7 +970,7 @@ function renderTimeline(animation = null) {
 
   ctx.strokeStyle = "#1d2528";
   ctx.beginPath();
-  ctx.moveTo(pad.left, mode === "benchmarkTags" ? pad.top : modelTop);
+  ctx.moveTo(pad.left, mode === "benchmarks" ? pad.top : modelTop);
   ctx.lineTo(pad.left, height - pad.bottom);
   ctx.lineTo(axisRight, height - pad.bottom);
   ctx.stroke();
@@ -996,7 +998,7 @@ function renderTimeline(animation = null) {
     }
   });
 
-  if (mode !== "benchmarkTags") {
+  if (mode !== "benchmarks") {
     drawModelPoints.forEach((point) => {
       const x = xScale(point.dateMs);
       const y = yScale(point.capability_sum) + (point.timelineRise || 0);
@@ -1019,6 +1021,32 @@ function renderTimeline(animation = null) {
         ctx.textAlign = "left";
         ctx.fillText(label, x + 6, y - 5);
         ctx.globalAlpha = 1;
+      }
+    });
+  }
+
+  if (mode === "benchmarks" && hasBenchAxis) {
+    drawBenchmarkPoints.forEach((point) => {
+      const x = xScale(point.dateMs);
+      const y = benchMainYScale(point.metricValue);
+      const radius = 4 + clamp((point.metricValue - benchMinRaw) / (benchMaxRaw - benchMinRaw || 1), 0, 1) * 2.4;
+      point.canvasX = x;
+      point.canvasY = y;
+      point.canvasRadius = 10;
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(Math.PI / 4);
+      ctx.fillStyle = metricColor(point.metricValue, benchMinRaw, benchMaxRaw);
+      ctx.globalAlpha = 0.9;
+      ctx.fillRect(-radius, -radius, radius * 2, radius * 2);
+      ctx.restore();
+      ctx.globalAlpha = 1;
+
+      if (point.metricValue >= quantile(benchmarkPoints.map((item) => item.metricValue), 0.82)) {
+        ctx.fillStyle = "#697176";
+        ctx.font = "10px system-ui";
+        ctx.textAlign = "left";
+        ctx.fillText(compactTimelineLabel(point.model), x + 7, y - 6);
       }
     });
   }
@@ -1047,57 +1075,17 @@ function renderTimeline(animation = null) {
     });
   }
 
-  if (mode === "benchmarkTags" && hasBenchAxis) {
-    const laneCounts = new Map();
-    drawBenchmarkPoints.forEach((point) => {
-      point.timelineTag = dominantBenchmarkTag(point);
-      laneCounts.set(point.timelineTag, (laneCounts.get(point.timelineTag) || 0) + 1);
-    });
-    const lanes = [...laneCounts.entries()]
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 8)
-      .map(([tag]) => tag);
-    const laneSet = new Set(lanes);
-    const finalLanes = [...lanes, "Other"];
-    const laneTop = pad.top + 18;
-    const laneBottom = height - pad.bottom - 8;
-    const laneStep = (laneBottom - laneTop) / Math.max(1, finalLanes.length - 1);
-    ctx.font = "11px system-ui";
-    finalLanes.forEach((tag, index) => {
-      const y = laneTop + index * laneStep;
-      ctx.strokeStyle = "#e1dacf";
-      ctx.beginPath();
-      ctx.moveTo(pad.left, y);
-      ctx.lineTo(axisRight, y);
-      ctx.stroke();
-      ctx.fillStyle = "#697176";
-      ctx.textAlign = "right";
-      ctx.fillText(tag.slice(0, 20), pad.left - 10, y + 4);
-    });
-    drawBenchmarkPoints.forEach((point) => {
-      const tag = laneSet.has(point.timelineTag) ? point.timelineTag : "Other";
-      const laneIndex = finalLanes.indexOf(tag);
-      const x = xScale(point.dateMs);
-      const y = laneTop + laneIndex * laneStep;
-      const radius = 3.8 + clamp((point.metricValue - benchMinRaw) / (benchMaxRaw - benchMinRaw || 1), 0, 1) * 2.2;
-      point.canvasX = x;
-      point.canvasY = y;
-      point.canvasRadius = 10;
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.rotate(Math.PI / 4);
-      ctx.fillStyle = metricColor(point.metricValue, benchMinRaw, benchMaxRaw);
-      ctx.globalAlpha = 0.9;
-      ctx.fillRect(-radius, -radius, radius * 2, radius * 2);
-      ctx.restore();
-    });
-  }
-
   ctx.fillStyle = "#1d2528";
   ctx.font = "12px system-ui";
   ctx.textAlign = "center";
   ctx.fillText("Release date", pad.left + plotW / 2, isHeroMode ? height - 58 : height - 12);
-  if (mode !== "benchmarkTags") {
+  if (mode === "benchmarks") {
+    ctx.save();
+    ctx.translate(20, pad.top + plotH / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillText(`Benchmark ${metricLabel}`, 0, 0);
+    ctx.restore();
+  } else {
     ctx.save();
     ctx.translate(20, modelTop + modelH / 2);
     ctx.rotate(-Math.PI / 2);
@@ -1106,7 +1094,7 @@ function renderTimeline(animation = null) {
   }
 
   const hitPoints = animation?.animating ? [] : [
-    ...(mode === "benchmarkTags" ? [] : drawModelPoints.filter((point) => point.timelineActive)),
+    ...(mode === "benchmarks" ? [] : drawModelPoints.filter((point) => point.timelineActive)),
     ...drawBenchmarkPoints,
   ];
   state.timelinePoints = hitPoints;
@@ -1116,7 +1104,7 @@ function renderTimeline(animation = null) {
 function showTimelineTooltip(point, x, y) {
   els.timelineTooltip.hidden = false;
   const detail = point.pointType === "benchmark"
-    ? `Benchmark · ${escapeHtml(point.release_date)} · ${benchmarkTimelineMetricLabel()} ${fmt(point.metricValue, 3)} · ${escapeHtml(dominantBenchmarkTag(point))}`
+    ? `Benchmark · ${escapeHtml(point.release_date)} · ${benchmarkTimelineMetricLabel()} ${fmt(point.metricValue, 3)}`
     : `${escapeHtml(point.family)} · ${escapeHtml(point.release_date)} · capability ${fmt(point.capability_sum, 3)}`;
   els.timelineTooltip.innerHTML = `
     <strong>${escapeHtml(point.model)}</strong>
