@@ -12,6 +12,7 @@ const state = {
   timelineIntroPlayed: false,
   heroActive: true,
   heroReadyAt: 0,
+  dashboardRendered: false,
 };
 
 const FIXED_RUN_TAG = "extend4689_buck_meansafe_bce_corrloss_wogamma_vd=20_R=0.1_btlw=12_fold_idx3";
@@ -787,6 +788,7 @@ function exitHeroMode() {
   window.setTimeout(() => {
     document.body.classList.remove("hero-mode", "hero-exiting");
     window.scrollTo(0, 0);
+    renderDeferredDashboard();
     renderTimeline();
   }, 170);
 }
@@ -804,6 +806,18 @@ function enableHeroMode() {
   window.addEventListener("wheel", handleHeroExit, { passive: false });
   window.addEventListener("pointermove", handleHeroExit);
   window.addEventListener("keydown", handleHeroExit);
+}
+
+function renderDeferredDashboard() {
+  if (state.dashboardRendered) return;
+  state.dashboardRendered = true;
+  hydrateStats();
+  renderModels();
+  renderBenchmarks();
+  renderTags();
+  renderHeatmap();
+  renderFit();
+  renderFitImage();
 }
 
 function renderTimeline(animation = null) {
@@ -1336,7 +1350,7 @@ function bindEvents() {
   window.addEventListener("resize", () => {
     if (state.data) {
       renderTimeline();
-      renderFit();
+      if (state.dashboardRendered) renderFit();
     }
   });
 }
@@ -1346,17 +1360,10 @@ async function init() {
   if (!response.ok) throw new Error(`Failed to load dashboard_data.json: ${response.status}`);
   state.data = await response.json();
   populateControls();
-  hydrateStats();
   bindEvents();
   enableHeroMode();
-  renderModels();
-  renderBenchmarks();
   renderCanvasFamilyLegend();
   animateTimelineIntro();
-  renderTags();
-  renderHeatmap();
-  renderFit();
-  renderFitImage();
 }
 
 init().catch((error) => {
