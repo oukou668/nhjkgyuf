@@ -671,7 +671,7 @@ function metricColor(value, min, max) {
 }
 
 function familyCounts() {
-  return [...timelineData(), ...benchmarkTimelineData()]
+  return timelineData()
     .map((point) => ({ ...point, dateMs: new Date(`${point.release_date}T00:00:00`).getTime() }))
     .filter((point) => Number.isFinite(point.dateMs) && point.dateMs >= TIMELINE_START_MS)
     .reduce((counts, point) => {
@@ -874,7 +874,7 @@ function renderTimeline(animation = null) {
   const visibleModels = mode === "benchmarks" ? [] : modelPoints.filter((point) => timelineVisibleFor(point, state.selectedFamily));
   const visibleBenchmarks = mode === "models"
     ? []
-    : benchmarkPoints.filter((point) => mode === "benchmarks" || timelineVisibleFor(point, state.selectedFamily));
+    : benchmarkPoints;
   const xPoints = [...modelPoints, ...benchmarkPoints];
   const isIntroAnimation = animation?.kind === "intro";
   const drawModelPoints = isIntroAnimation
