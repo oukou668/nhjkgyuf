@@ -6,52 +6,52 @@
 <text x="28" y="68" font-weight="700">Claude Opus 4.6 (2026-02-05)</text>
 <text x="248" y="99" text-anchor="end">Quantitative-Formal</text>
 <rect x="260.0" y="85" width="620.0" height="18" fill="#bb4a4a" opacity="0.78"/>
-<text x="888.0" y="99" text-anchor="start">0.005294</text>
+<text x="888.0" y="99" text-anchor="start">0.005525</text>
 <text x="248" y="129" text-anchor="end">Search-Load</text>
-<rect x="260.0" y="115" width="606.6" height="18" fill="#bb4a4a" opacity="0.78"/>
-<text x="874.6" y="129" text-anchor="start">0.005179</text>
+<rect x="260.0" y="115" width="601.0" height="18" fill="#bb4a4a" opacity="0.78"/>
+<text x="869.0" y="129" text-anchor="start">0.005355</text>
 <text x="248" y="159" text-anchor="end">Abstraction-Learning</text>
-<rect x="260.0" y="145" width="605.1" height="18" fill="#bb4a4a" opacity="0.78"/>
-<text x="873.1" y="159" text-anchor="start">0.005167</text>
+<rect x="260.0" y="145" width="599.6" height="18" fill="#bb4a4a" opacity="0.78"/>
+<text x="867.6" y="159" text-anchor="start">0.005343</text>
 <text x="248" y="189" text-anchor="end">Logical-Control</text>
-<rect x="260.0" y="175" width="602.2" height="18" fill="#bb4a4a" opacity="0.78"/>
-<text x="870.2" y="189" text-anchor="start">0.005142</text>
+<rect x="260.0" y="175" width="596.8" height="18" fill="#bb4a4a" opacity="0.78"/>
+<text x="864.8" y="189" text-anchor="start">0.005319</text>
 <text x="248" y="219" text-anchor="end">Verbal-Language</text>
-<rect x="260.0" y="205" width="602.2" height="18" fill="#bb4a4a" opacity="0.78"/>
-<text x="870.2" y="219" text-anchor="start">0.005142</text>
+<rect x="260.0" y="205" width="596.8" height="18" fill="#bb4a4a" opacity="0.78"/>
+<text x="864.8" y="219" text-anchor="start">0.005319</text>
 <text x="248" y="249" text-anchor="end">Game-Environment</text>
-<rect x="260.0" y="235" width="264.6" height="18" fill="#bb4a4a" opacity="0.78"/>
-<text x="532.6" y="249" text-anchor="start">0.002260</text>
+<rect x="260.0" y="235" width="285.7" height="18" fill="#bb4a4a" opacity="0.78"/>
+<text x="553.7" y="249" text-anchor="start">0.002546</text>
 <text x="248" y="279" text-anchor="end">Science</text>
-<rect x="260.0" y="265" width="242.6" height="18" fill="#bb4a4a" opacity="0.78"/>
-<text x="510.6" y="279" text-anchor="start">0.002071</text>
-<text x="248" y="309" text-anchor="end">Coding</text>
-<rect x="260.0" y="295" width="241.1" height="18" fill="#bb4a4a" opacity="0.78"/>
-<text x="509.1" y="309" text-anchor="start">0.002059</text>
+<rect x="260.0" y="265" width="282.3" height="18" fill="#bb4a4a" opacity="0.78"/>
+<text x="550.3" y="279" text-anchor="start">0.002516</text>
+<text x="248" y="309" text-anchor="end">Safety</text>
+<rect x="260.0" y="295" width="271.0" height="18" fill="#bb4a4a" opacity="0.78"/>
+<text x="539.0" y="309" text-anchor="start">0.002415</text>
 <text x="28" y="334" font-weight="700">DeepSeek R1 (2025-01-20)</text>
 <text x="248" y="365" text-anchor="end">Quantitative-Formal</text>
-<rect x="260.0" y="351" width="38.2" height="18" fill="#bb4a4a" opacity="0.78"/>
-<text x="306.2" y="365" text-anchor="start">0.000327</text>
+<rect x="260.0" y="351" width="27.8" height="18" fill="#bb4a4a" opacity="0.78"/>
+<text x="295.8" y="365" text-anchor="start">0.000247</text>
 <text x="248" y="395" text-anchor="end">Search-Load</text>
-<rect x="260.0" y="381" width="36.7" height="18" fill="#bb4a4a" opacity="0.78"/>
-<text x="304.7" y="395" text-anchor="start">0.000313</text>
+<rect x="260.0" y="381" width="25.9" height="18" fill="#bb4a4a" opacity="0.78"/>
+<text x="293.9" y="395" text-anchor="start">0.000230</text>
 <text x="248" y="425" text-anchor="end">Logical-Control</text>
-<rect x="260.0" y="411" width="35.6" height="18" fill="#bb4a4a" opacity="0.78"/>
-<text x="303.6" y="425" text-anchor="start">0.000304</text>
+<rect x="260.0" y="411" width="25.0" height="18" fill="#bb4a4a" opacity="0.78"/>
+<text x="293.0" y="425" text-anchor="start">0.000223</text>
 <text x="248" y="455" text-anchor="end">Verbal-Language</text>
-<rect x="260.0" y="441" width="35.6" height="18" fill="#bb4a4a" opacity="0.78"/>
-<text x="303.6" y="455" text-anchor="start">0.000304</text>
+<rect x="260.0" y="441" width="25.0" height="18" fill="#bb4a4a" opacity="0.78"/>
+<text x="293.0" y="455" text-anchor="start">0.000223</text>
 <text x="248" y="485" text-anchor="end">Abstraction-Learning</text>
-<rect x="260.0" y="471" width="34.5" height="18" fill="#bb4a4a" opacity="0.78"/>
-<text x="302.5" y="485" text-anchor="start">0.000295</text>
-<text x="248" y="515" text-anchor="end">Game-Environment</text>
-<rect x="248.1" y="501" width="11.9" height="18" fill="#2f6f9f" opacity="0.78"/>
-<text x="240.1" y="515" text-anchor="end">-0.000102</text>
+<rect x="260.0" y="471" width="23.9" height="18" fill="#bb4a4a" opacity="0.78"/>
+<text x="291.9" y="485" text-anchor="start">0.000213</text>
+<text x="248" y="515" text-anchor="end">Coding</text>
+<rect x="260.0" y="501" width="0.0" height="18" fill="#bb4a4a" opacity="0.78"/>
+<text x="268.0" y="515" text-anchor="start">0.000000</text>
 <text x="248" y="545" text-anchor="end">Multilingual_v1.1</text>
-<rect x="243.3" y="531" width="16.7" height="18" fill="#2f6f9f" opacity="0.78"/>
-<text x="235.3" y="545" text-anchor="end">-0.000142</text>
-<text x="248" y="575" text-anchor="end">Social-Humanities</text>
-<rect x="238.5" y="561" width="21.5" height="18" fill="#2f6f9f" opacity="0.78"/>
-<text x="230.5" y="575" text-anchor="end">-0.000184</text>
+<rect x="240.7" y="531" width="19.3" height="18" fill="#2f6f9f" opacity="0.78"/>
+<text x="232.7" y="545" text-anchor="end">-0.000172</text>
+<text x="248" y="575" text-anchor="end">Game-Environment</text>
+<rect x="239.5" y="561" width="20.5" height="18" fill="#2f6f9f" opacity="0.78"/>
+<text x="231.5" y="575" text-anchor="end">-0.000182</text>
 </g>
 </svg>

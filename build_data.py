@@ -100,6 +100,11 @@ MODEL_VERSION_FILES = [
     REMOTE_SOURCE_ROOT / "data_added" / "model_versions_added.csv",
     ROOT / "data_added" / "model_versions_added.csv",
 ]
+BENCHMARK_SOURCE_ALIASES = {
+    "livecodebench/code_generation_lite_v1": "LiveCodeBench v1",
+    "livecodebench/code_generation_lite_v4": "LiveCodeBench v4",
+    "livecodebench/code_generation_lite_v5": "LiveCodeBench v5",
+}
 METHOD = RUN_TAG.split("_vd=")[0]
 R_MATCH = re.search(r"(?:^|_)R=([0-9.]+)", RUN_TAG)
 R_VALUE = float(R_MATCH.group(1)) if R_MATCH else 0.1
@@ -182,14 +187,14 @@ def normalize_name(value: str) -> str:
 
 def load_benchmark_name_map() -> dict[str, str]:
     path = REMOTE_SOURCE_ROOT / "data_added" / "benchmarkname.csv"
+    name_map = dict(BENCHMARK_SOURCE_ALIASES)
     if not path.exists():
-        return {}
+        return name_map
     df = pd.read_csv(path)
-    return {
-        str(row["from"]): str(row["to"])
-        for _, row in df.iterrows()
-        if pd.notna(row.get("from")) and pd.notna(row.get("to"))
-    }
+    for _, row in df.iterrows():
+        if pd.notna(row.get("from")) and pd.notna(row.get("to")):
+            name_map[str(row["from"])] = str(row["to"])
+    return name_map
 
 
 def load_tags() -> tuple[dict[str, list[str]], dict[str, dict[str, float]], list[str]]:
@@ -203,12 +208,25 @@ def load_tags() -> tuple[dict[str, list[str]], dict[str, dict[str, float]], list
         tag_score_lookup: dict[str, dict[str, float]] = {}
         for source_name, tag_stats in (stats.get("by_benchmark") or {}).items():
             display_name = name_map.get(source_name, source_name)
+            source_tail = source_name.split("/")[-1]
+            tail_display = source_tail.replace("_", " ").replace("-", " ")
+            if source_name.startswith("nonhf/") and source_name not in name_map:
+                display_name = tail_display
             scores = {}
             for tag in tag_columns:
                 score = ((tag_stats.get(tag) or {}).get("score") or {}).get("weighted_mean")
                 scores[tag] = clean_number(score) or 0.0
             active_tags = [tag for tag, score in scores.items() if score > 0]
-            for alias in {source_name, display_name, normalize_name(source_name), normalize_name(display_name)}:
+            for alias in {
+                source_name,
+                display_name,
+                source_tail,
+                tail_display,
+                normalize_name(source_name),
+                normalize_name(display_name),
+                normalize_name(source_tail),
+                normalize_name(tail_display),
+            }:
                 tag_score_lookup[alias] = scores
                 tag_lookup[alias] = active_tags
         return tag_lookup, tag_score_lookup, tag_columns

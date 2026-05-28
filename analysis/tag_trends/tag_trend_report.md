@@ -11,16 +11,16 @@
 
 | Rank | Tag | Slope/year | Corr | Delta | N |
 |---:|---|---:|---:|---:|---:|
-| 1 | Quantitative-Formal | 0.001589 | 0.482 | 0.006633 | 266 |
-| 2 | Search-Load | 0.001556 | 0.482 | 0.006497 | 266 |
-| 3 | Logical-Control | 0.001544 | 0.482 | 0.006447 | 266 |
-| 4 | Verbal-Language | 0.001544 | 0.482 | 0.006447 | 266 |
-| 5 | Abstraction-Learning | 0.001457 | 0.465 | 0.006267 | 266 |
-| 6 | Instruction-Constrained | 0.000647 | 0.392 | 0.003810 | 266 |
-| 7 | Science | 0.000643 | 0.386 | 0.003845 | 266 |
-| 8 | Coding | 0.000541 | 0.346 | 0.003474 | 266 |
-| 9 | Multilingual_v1.1 | 0.000540 | 0.346 | 0.003315 | 266 |
-| 10 | Format-Familiarity | 0.000532 | 0.382 | 0.003153 | 266 |
+| 1 | Quantitative-Formal | 0.001659 | 0.485 | 0.007021 | 266 |
+| 2 | Search-Load | 0.001610 | 0.485 | 0.006815 | 266 |
+| 3 | Logical-Control | 0.001598 | 0.485 | 0.006766 | 266 |
+| 4 | Verbal-Language | 0.001598 | 0.485 | 0.006766 | 266 |
+| 5 | Abstraction-Learning | 0.001514 | 0.469 | 0.006593 | 266 |
+| 6 | Science | 0.000769 | 0.398 | 0.004598 | 266 |
+| 7 | Instruction-Constrained | 0.000713 | 0.402 | 0.004193 | 266 |
+| 8 | Multilingual_v1.1 | 0.000590 | 0.342 | 0.003665 | 266 |
+| 9 | Format-Familiarity | 0.000589 | 0.391 | 0.003482 | 266 |
+| 10 | Social-Humanities | 0.000574 | 0.343 | 0.003565 | 266 |
 
 ## Event Jump Analysis
 
@@ -35,14 +35,14 @@ This section compares the event model cohort against same-family models released
 
 | Rank | Tag | Jump | Event mean | Pre mean | Z | Event models |
 |---:|---|---:|---:|---:|---:|---|
-| 1 | Quantitative-Formal | 0.000327 | 0.003886 | 0.003559 | 2.03 | DeepSeek-R1 |
-| 2 | Search-Load | 0.000313 | 0.003849 | 0.003536 | 1.96 | DeepSeek-R1 |
-| 3 | Logical-Control | 0.000304 | 0.003881 | 0.003577 | 1.81 | DeepSeek-R1 |
-| 4 | Verbal-Language | 0.000304 | 0.003881 | 0.003577 | 1.81 | DeepSeek-R1 |
-| 5 | Abstraction-Learning | 0.000295 | 0.003849 | 0.003554 | 1.64 | DeepSeek-R1 |
-| 6 | Game-Environment | -0.000102 | 0.000488 | 0.000589 | -3.44 | DeepSeek-R1 |
-| 7 | Multilingual_v1.1 | -0.000142 | 0.001355 | 0.001497 | -8.23 | DeepSeek-R1 |
-| 8 | Social-Humanities | -0.000184 | 0.001474 | 0.001658 | -1.80 | DeepSeek-R1 |
+| 1 | Quantitative-Formal | 0.000247 | 0.004495 | 0.004248 | 1.42 | DeepSeek-R1 |
+| 2 | Search-Load | 0.000230 | 0.004424 | 0.004194 | 1.33 | DeepSeek-R1 |
+| 3 | Logical-Control | 0.000223 | 0.004451 | 0.004228 | 1.23 | DeepSeek-R1 |
+| 4 | Verbal-Language | 0.000223 | 0.004451 | 0.004228 | 1.23 | DeepSeek-R1 |
+| 5 | Abstraction-Learning | 0.000213 | 0.004425 | 0.004212 | 1.10 | DeepSeek-R1 |
+| 6 | Coding | 0.000000 | 0.000000 | 0.000000 | 0.00 | DeepSeek-R1 |
+| 7 | Multilingual_v1.1 | -0.000172 | 0.001626 | 0.001799 | -5.16 | DeepSeek-R1 |
+| 8 | Game-Environment | -0.000182 | 0.001210 | 0.001392 | -10.55 | DeepSeek-R1 |
 
 ### Claude Opus 4.6
 
@@ -53,14 +53,14 @@ This section compares the event model cohort against same-family models released
 
 | Rank | Tag | Jump | Event mean | Pre mean | Z | Event models |
 |---:|---|---:|---:|---:|---:|---|
-| 1 | Quantitative-Formal | 0.005294 | 0.011187 | 0.005893 | 1.94 | claude-opus-4-6_adaptive_max, claude-opus-4-6_max |
-| 2 | Search-Load | 0.005179 | 0.011002 | 0.005822 | 1.94 | claude-opus-4-6_adaptive_max, claude-opus-4-6_max |
-| 3 | Abstraction-Learning | 0.005167 | 0.010801 | 0.005634 | 1.91 | claude-opus-4-6_adaptive_max, claude-opus-4-6_max |
-| 4 | Logical-Control | 0.005142 | 0.010975 | 0.005833 | 1.95 | claude-opus-4-6_adaptive_max, claude-opus-4-6_max |
-| 5 | Verbal-Language | 0.005142 | 0.010975 | 0.005833 | 1.95 | claude-opus-4-6_adaptive_max, claude-opus-4-6_max |
-| 6 | Game-Environment | 0.002260 | 0.003242 | 0.000983 | 3.87 | claude-opus-4-6_adaptive_max, claude-opus-4-6_max |
-| 7 | Science | 0.002071 | 0.005758 | 0.003687 | 4.52 | claude-opus-4-6_adaptive_max, claude-opus-4-6_max |
-| 8 | Coding | 0.002059 | 0.003973 | 0.001914 | 3.72 | claude-opus-4-6_adaptive_max, claude-opus-4-6_max |
+| 1 | Quantitative-Formal | 0.005525 | 0.012224 | 0.006699 | 2.03 | claude-opus-4-6_adaptive_max, claude-opus-4-6_max |
+| 2 | Search-Load | 0.005355 | 0.011930 | 0.006574 | 2.03 | claude-opus-4-6_adaptive_max, claude-opus-4-6_max |
+| 3 | Abstraction-Learning | 0.005343 | 0.011736 | 0.006393 | 1.99 | claude-opus-4-6_adaptive_max, claude-opus-4-6_max |
+| 4 | Logical-Control | 0.005319 | 0.011897 | 0.006578 | 2.03 | claude-opus-4-6_adaptive_max, claude-opus-4-6_max |
+| 5 | Verbal-Language | 0.005319 | 0.011897 | 0.006578 | 2.03 | claude-opus-4-6_adaptive_max, claude-opus-4-6_max |
+| 6 | Game-Environment | 0.002546 | 0.004617 | 0.002071 | 5.22 | claude-opus-4-6_adaptive_max, claude-opus-4-6_max |
+| 7 | Science | 0.002516 | 0.007150 | 0.004634 | 5.90 | claude-opus-4-6_adaptive_max, claude-opus-4-6_max |
+| 8 | Safety | 0.002415 | 0.005087 | 0.002672 | 4.85 | claude-opus-4-6_adaptive_max, claude-opus-4-6_max |
 
 ## Tag Frontier Lines
 
@@ -68,12 +68,12 @@ For selected tags, this takes the strongest model-tag score available at each re
 
 | Tag | Final frontier | Current best model | Last frontier refresh | Refresh count |
 |---|---:|---|---|---:|
-| Quantitative-Formal | 0.025713 | Claude Mythos Preview | 2026-05-05 · Claude Mythos Preview | 10 |
-| Logical-Control | 0.025017 | Claude Mythos Preview | 2026-05-05 · Claude Mythos Preview | 10 |
-| Abstraction-Learning | 0.024521 | Claude Mythos Preview | 2026-05-05 · Claude Mythos Preview | 11 |
-| Search-Load | 0.025212 | Claude Mythos Preview | 2026-05-05 · Claude Mythos Preview | 10 |
-| Coding | 0.015421 | Claude Mythos Preview | 2026-05-05 · Claude Mythos Preview | 9 |
-| Science | 0.016197 | Claude Mythos Preview | 2026-05-05 · Claude Mythos Preview | 8 |
+| Quantitative-Formal | 0.026853 | Claude Mythos Preview | 2026-05-05 · Claude Mythos Preview | 9 |
+| Logical-Control | 0.025916 | Claude Mythos Preview | 2026-05-05 · Claude Mythos Preview | 9 |
+| Abstraction-Learning | 0.025439 | Claude Mythos Preview | 2026-05-05 · Claude Mythos Preview | 9 |
+| Search-Load | 0.026110 | Claude Mythos Preview | 2026-05-05 · Claude Mythos Preview | 9 |
+| Coding | 0.000000 | LLaMA-13B | 2023-02-24 · LLaMA-13B | 1 |
+| Science | 0.018554 | Claude Mythos Preview | 2026-05-05 · Claude Mythos Preview | 10 |
 
 ## Family Fastest-Rising Tags
 
@@ -81,71 +81,71 @@ For selected tags, this takes the strongest model-tag score available at each re
 
 | Rank | Tag | Slope/year | Corr | Delta | N |
 |---:|---|---:|---:|---:|---:|
-| 1 | Quantitative-Formal | 0.004496 | 0.593 | 0.009312 | 19 |
-| 2 | Search-Load | 0.004402 | 0.593 | 0.009117 | 19 |
-| 3 | Logical-Control | 0.004364 | 0.594 | 0.009040 | 19 |
-| 4 | Verbal-Language | 0.004364 | 0.594 | 0.009040 | 19 |
-| 5 | Abstraction-Learning | 0.004220 | 0.579 | 0.008809 | 19 |
+| 1 | Quantitative-Formal | 0.004632 | 0.599 | 0.009592 | 19 |
+| 2 | Search-Load | 0.004496 | 0.600 | 0.009307 | 19 |
+| 3 | Logical-Control | 0.004458 | 0.600 | 0.009232 | 19 |
+| 4 | Verbal-Language | 0.004458 | 0.600 | 0.009232 | 19 |
+| 5 | Abstraction-Learning | 0.004319 | 0.586 | 0.009009 | 19 |
 
 ### DeepSeek
 
 | Rank | Tag | Slope/year | Corr | Delta | N |
 |---:|---|---:|---:|---:|---:|
-| 1 | Multilingual_v1.1 | 0.002073 | 0.825 | 0.000198 | 12 |
-| 2 | Social-Humanities | 0.001819 | 0.808 | 0.000140 | 12 |
-| 3 | Science | 0.001329 | 0.663 | -0.000109 | 12 |
-| 4 | Instruction-Constrained | 0.001311 | 0.657 | -0.000112 | 12 |
-| 5 | Quantitative-Formal | 0.001261 | 0.665 | 0.000179 | 12 |
+| 1 | Multilingual_v1.1 | 0.002100 | 0.811 | 0.000157 | 12 |
+| 2 | Social-Humanities | 0.001908 | 0.799 | 0.000120 | 12 |
+| 3 | Science | 0.001171 | 0.597 | -0.000134 | 12 |
+| 4 | Quantitative-Formal | 0.001043 | 0.579 | 0.000114 | 12 |
+| 5 | Instruction-Constrained | 0.001025 | 0.557 | -0.000193 | 12 |
 
 ### GPT
 
 | Rank | Tag | Slope/year | Corr | Delta | N |
 |---:|---|---:|---:|---:|---:|
-| 1 | Quantitative-Formal | 0.001947 | 0.627 | 0.005026 | 37 |
-| 2 | Search-Load | 0.001909 | 0.627 | 0.004926 | 37 |
-| 3 | Logical-Control | 0.001903 | 0.627 | 0.004893 | 37 |
-| 4 | Verbal-Language | 0.001903 | 0.627 | 0.004893 | 37 |
-| 5 | Abstraction-Learning | 0.001844 | 0.623 | 0.004790 | 37 |
+| 1 | Quantitative-Formal | 0.002044 | 0.629 | 0.005521 | 37 |
+| 2 | Search-Load | 0.001988 | 0.629 | 0.005365 | 37 |
+| 3 | Logical-Control | 0.001981 | 0.629 | 0.005329 | 37 |
+| 4 | Verbal-Language | 0.001981 | 0.629 | 0.005329 | 37 |
+| 5 | Abstraction-Learning | 0.001925 | 0.624 | 0.005232 | 37 |
 
 ### Gemini
 
 | Rank | Tag | Slope/year | Corr | Delta | N |
 |---:|---|---:|---:|---:|---:|
-| 1 | Quantitative-Formal | 0.003529 | 0.687 | 0.005963 | 19 |
-| 2 | Search-Load | 0.003455 | 0.686 | 0.005839 | 19 |
-| 3 | Logical-Control | 0.003426 | 0.685 | 0.005796 | 19 |
-| 4 | Verbal-Language | 0.003426 | 0.685 | 0.005796 | 19 |
-| 5 | Abstraction-Learning | 0.003349 | 0.678 | 0.005664 | 19 |
+| 1 | Quantitative-Formal | 0.003615 | 0.684 | 0.006155 | 19 |
+| 2 | Search-Load | 0.003507 | 0.683 | 0.005973 | 19 |
+| 3 | Logical-Control | 0.003479 | 0.682 | 0.005931 | 19 |
+| 4 | Verbal-Language | 0.003479 | 0.682 | 0.005931 | 19 |
+| 5 | Abstraction-Learning | 0.003404 | 0.675 | 0.005804 | 19 |
 
 ### Llama
 
 | Rank | Tag | Slope/year | Corr | Delta | N |
 |---:|---|---:|---:|---:|---:|
-| 1 | Coding | 0.000373 | 0.709 | 0.000551 | 25 |
-| 2 | Science | 0.000373 | 0.441 | 0.000454 | 25 |
-| 3 | Instruction-Constrained | 0.000372 | 0.436 | 0.000476 | 25 |
-| 4 | Format-Familiarity | 0.000326 | 0.451 | 0.000399 | 25 |
-| 5 | Math | 0.000326 | 0.437 | 0.000410 | 25 |
+| 1 | Science | 0.000462 | 0.498 | 0.000531 | 25 |
+| 2 | Instruction-Constrained | 0.000434 | 0.501 | 0.000522 | 25 |
+| 3 | Math | 0.000384 | 0.498 | 0.000456 | 25 |
+| 4 | Format-Familiarity | 0.000379 | 0.505 | 0.000440 | 25 |
+| 5 | Quantitative-Formal | 0.000284 | 0.409 | 0.000284 | 25 |
 
 ### Others
 
 | Rank | Tag | Slope/year | Corr | Delta | N |
 |---:|---|---:|---:|---:|---:|
-| 1 | Quantitative-Formal | 0.000447 | 0.375 | 0.001904 | 62 |
-| 2 | Search-Load | 0.000435 | 0.371 | 0.001867 | 62 |
-| 3 | Logical-Control | 0.000428 | 0.367 | 0.001861 | 62 |
-| 4 | Verbal-Language | 0.000428 | 0.367 | 0.001861 | 62 |
-| 5 | Abstraction-Learning | 0.000414 | 0.359 | 0.001722 | 62 |
+| 1 | Quantitative-Formal | 0.000461 | 0.362 | 0.001843 | 62 |
+| 2 | Search-Load | 0.000443 | 0.357 | 0.001792 | 62 |
+| 3 | Logical-Control | 0.000437 | 0.353 | 0.001787 | 62 |
+| 4 | Verbal-Language | 0.000437 | 0.353 | 0.001787 | 62 |
+| 5 | Abstraction-Learning | 0.000423 | 0.346 | 0.001652 | 62 |
 
 ### Qwen
 
 | Rank | Tag | Slope/year | Corr | Delta | N |
 |---:|---|---:|---:|---:|---:|
-| 1 | Quantitative-Formal | 0.000841 | 0.569 | 0.003424 | 83 |
-| 2 | Search-Load | 0.000824 | 0.569 | 0.003348 | 83 |
-| 3 | Logical-Control | 0.000817 | 0.569 | 0.003316 | 83 |
-| 4 | Verbal-Language | 0.000817 | 0.569 | 0.003316 | 83 |
-| 5 | Abstraction-Learning | 0.000729 | 0.534 | 0.003222 | 83 |
+| 1 | Quantitative-Formal | 0.000881 | 0.565 | 0.003967 | 83 |
+| 2 | Search-Load | 0.000855 | 0.565 | 0.003844 | 83 |
+| 3 | Logical-Control | 0.000849 | 0.565 | 0.003808 | 83 |
+| 4 | Verbal-Language | 0.000849 | 0.565 | 0.003808 | 83 |
+| 5 | Abstraction-Learning | 0.000764 | 0.531 | 0.003722 | 83 |
 
 ## Shared Signals
 
@@ -160,8 +160,7 @@ For selected tags, this takes the strongest model-tag score available at each re
 
 | Family | Top distinctive tag | Slope/year |
 |---|---|---:|
-| DeepSeek | Multilingual_v1.1 | 0.002073 |
-| Llama | Coding | 0.000373 |
+| DeepSeek | Multilingual_v1.1 | 0.002100 |
 
 ## Caveats
 
