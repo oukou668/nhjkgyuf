@@ -651,6 +651,10 @@ td.name-cell {
   background: var(--surface-2);
 }
 
+.tag-card-muted {
+  background: #fbfcfd;
+}
+
 .tag-card h3 {
   margin: 0;
   color: var(--ink);
@@ -683,6 +687,10 @@ td.name-cell {
   color: var(--muted);
   font-size: 12px;
   line-height: 1.45;
+}
+
+.tag-note {
+  color: #7b8388;
 }
 
 .tag-meter {
@@ -755,6 +763,35 @@ td.name-cell {
   align-items: center;
   color: var(--ink);
   font-size: 12px;
+}
+
+.tag-anchor-list li {
+  grid-template-columns: 26px minmax(0, 1fr);
+}
+
+.tag-anchor-list li strong {
+  order: 0;
+  color: var(--blue);
+  text-align: left;
+}
+
+.tag-anchor-list li span {
+  order: 1;
+  white-space: normal;
+}
+
+.tag-note-list {
+  display: block;
+  padding-left: 0;
+  list-style: disc;
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.tag-note-list li {
+  display: list-item;
+  margin-left: 16px;
 }
 
 .tag-active-list li span {

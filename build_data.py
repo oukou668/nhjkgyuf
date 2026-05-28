@@ -446,18 +446,26 @@ def build_tag_projection(
 
 def load_tag_reference() -> dict[str, Any]:
     explanations: dict[str, dict[str, Any]] = {}
+    rubric_tags: list[dict[str, Any]] = []
     if RUBRICS_JSON.exists():
         rubrics = json.loads(RUBRICS_JSON.read_text(encoding="utf-8"))
         for head, head_info in (rubrics.get("heads") or {}).items():
             for tag, info in (head_info.get("tags") or {}).items():
                 if not isinstance(info, dict):
                     continue
-                explanations[tag] = {
+                if not any(info.get(key) for key in ("zh", "definition", "anchors")):
+                    continue
+                tag_reference = {
+                    "tag": tag,
                     "head": head,
                     "head_description": head_info.get("description"),
                     "zh": info.get("zh"),
                     "definition": info.get("definition"),
+                    "anchors": info.get("anchors") or {},
+                    "boundary_notes": info.get("boundary_notes") or [],
                 }
+                explanations[tag] = tag_reference
+                rubric_tags.append(tag_reference)
 
     active_by_tag: dict[str, list[dict[str, Any]]] = {}
     if TAG_STATS_JSON.exists():
@@ -516,6 +524,7 @@ def load_tag_reference() -> dict[str, Any]:
     return {
         "activity": activity,
         "explanations": explanations,
+        "rubric_tags": rubric_tags,
         "source_files": {
             "activity": str(TAG_ACTIVITY_CSV.relative_to(ROOT)) if TAG_ACTIVITY_CSV.exists() else None,
             "rubrics": str(RUBRICS_JSON.relative_to(ROOT)) if RUBRICS_JSON.exists() else None,

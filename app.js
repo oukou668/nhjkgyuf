@@ -512,38 +512,68 @@ function renderHeatmap() {
 
 function renderTags() {
   const activity = state.data.tag_reference?.activity || [];
-  if (activity.length) {
-    els.tagCards.innerHTML = activity
-      .map((tag) => `
-        <article class="tag-card">
+  const rubricTags = state.data.tag_reference?.rubric_tags || [];
+  if (rubricTags.length) {
+    const activityByTag = new Map(activity.map((tag) => [tag.tag, tag]));
+    els.tagCards.innerHTML = rubricTags
+      .map((rubricTag) => {
+        const tag = { ...rubricTag, ...(activityByTag.get(rubricTag.tag) || {}) };
+        const hasActivity = activityByTag.has(rubricTag.tag);
+        const anchors = Object.entries(rubricTag.anchors || {}).sort(([a], [b]) => Number(a) - Number(b));
+        return `
+        <article class="tag-card ${hasActivity ? "" : "tag-card-muted"}">
           <div class="tag-card-head">
             <h3>${escapeHtml(tag.zh || tag.tag)}</h3>
             <span>${escapeHtml(tag.head_description || tag.head || "标签")}</span>
           </div>
           <strong>原始标签：${escapeHtml(tag.tag)}</strong>
           <p>${escapeHtml(tag.definition || "No rubric definition available.")}</p>
-          <div class="tag-meter" aria-label="active benchmark ratio">
-            <span style="width:${clamp((tag.active_ratio || 0) * 100, 0, 100)}%"></span>
-          </div>
-          <dl class="tag-stats">
-            <div><dt>活跃覆盖</dt><dd>${tag.n_active_benchmarks}/${tag.n_total_benchmarks}</dd></div>
-            <div><dt>筛选均值</dt><dd>${fmt(tag.score_mean, 2)}</dd></div>
-            <div><dt>全量均值</dt><dd>${fmt(tag.score_mean_all, 2)}</dd></div>
-            <div><dt title="outstandingC 活跃阈值：score > tau 即视为该 benchmark 激活此 tag">Tau 阈值</dt><dd>${fmt(tag.tau, 2)}</dd></div>
-          </dl>
-          <details class="tag-active-list">
-            <summary>查看激活 benchmark（${tag.active_benchmarks?.length || 0}）</summary>
-            <ul>
-              ${(tag.active_benchmarks || [])
-                .map((bench) => `
+          ${hasActivity ? `
+            <div class="tag-meter" aria-label="active benchmark ratio">
+              <span style="width:${clamp((tag.active_ratio || 0) * 100, 0, 100)}%"></span>
+            </div>
+            <dl class="tag-stats">
+              <div><dt>活跃覆盖</dt><dd>${tag.n_active_benchmarks}/${tag.n_total_benchmarks}</dd></div>
+              <div><dt>筛选均值</dt><dd>${fmt(tag.score_mean, 2)}</dd></div>
+              <div><dt>全量均值</dt><dd>${fmt(tag.score_mean_all, 2)}</dd></div>
+              <div><dt title="outstandingC 活跃阈值：score > tau 即视为该 benchmark 激活此 tag">Tau 阈值</dt><dd>${fmt(tag.tau, 2)}</dd></div>
+            </dl>
+            <details class="tag-active-list">
+              <summary>查看激活 benchmark（${tag.active_benchmarks?.length || 0}）</summary>
+              <ul>
+                ${(tag.active_benchmarks || [])
+                  .map((bench) => `
+                    <li>
+                      <span title="${escapeHtml(bench.source)}">${escapeHtml(bench.benchmark)}</span>
+                      <strong>${fmt(bench.score, 2)}</strong>
+                    </li>`)
+                  .join("")}
+              </ul>
+            </details>
+          ` : `<p class="tag-note">新版 rubric 中存在该标签；当前聚合 tag score 暂无 activity 统计。</p>`}
+          ${anchors.length ? `
+            <details class="tag-active-list">
+              <summary>查看 0-5 分锚点</summary>
+              <ul class="tag-anchor-list">
+                ${anchors.map(([score, text]) => `
                   <li>
-                    <span title="${escapeHtml(bench.source)}">${escapeHtml(bench.benchmark)}</span>
-                    <strong>${fmt(bench.score, 2)}</strong>
+                    <strong>${escapeHtml(score)}</strong>
+                    <span>${escapeHtml(text)}</span>
                   </li>`)
-                .join("")}
-            </ul>
-          </details>
-        </article>`)
+                  .join("")}
+              </ul>
+            </details>
+          ` : ""}
+          ${(rubricTag.boundary_notes || []).length ? `
+            <details class="tag-active-list">
+              <summary>边界说明</summary>
+              <ul class="tag-note-list">
+                ${rubricTag.boundary_notes.map((note) => `<li>${escapeHtml(note)}</li>`).join("")}
+              </ul>
+            </details>
+          ` : ""}
+        </article>`;
+      })
       .join("");
     return;
   }
