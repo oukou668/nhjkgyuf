@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#eaf4ff" />
+    <meta http-equiv="Cache-Control" content="no-store" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>Meta Evaluation</title>
+    <link rel="stylesheet" href="./styles.css?v=20260618-heatmap-contrast-2" />
+  </head>
+  <body class="hero-mode">
+    <nav class="site-topbar" aria-label="Primary navigation">
+      <div class="site-topbar-inner">
+        <a class="fudan-brand" href="#" aria-label="Fudan University">
+          <img class="fudan-mark" src="./assets/fudan-logo.svg" alt="" />
+          <span class="fudan-name">Fudan University</span>
+        </a>
+        <div class="site-nav-links">
+          <a href="#timelineView">Latest</a>
+          <a href="#modelsView">Research</a>
+          <a href="#tagsView">About</a>
+          <a href="#tagsView">Contact</a>
+        </div>
+      </div>
+    </nav>
+    <main class="shell">
+      <header class="masthead">
+        <div>
+          <h1>Meta Evaluation</h1>
+        </div>
+        <div class="run-meta" hidden>
+          <span id="runSource">Loading data...</span>
+          <select id="trainingRun" aria-label="训练设置"></select>
+          <span id="runConfigMeta"></span>
+        </div>
+      </header>
+
+      <section class="stats-grid" aria-label="数据概览">
+        <div class="stat"><span>Models</span><strong id="modelCount">--</strong></div>
+        <div class="stat"><span>Benchmarks</span><strong id="benchmarkCount">--</strong></div>
+        <div class="stat"><span>Latent dims</span><strong id="dimensionCount">--</strong></div>
+        <div class="stat"><span>Tags</span><strong id="tagCount">--</strong></div>
+        <div class="stat"><span>Fit MSE</span><strong id="fitMse">--</strong></div>
+      </section>
+
+      <section class="view active" id="timelineView">
+        <div class="module-title">
+          <div>
+            <p class="eyebrow">Module 01</p>
+            <h2>能力时间线</h2>
+          </div>
+          <span>横轴是发布时间；model 使用左轴原始 score，benchmark 使用右轴 metric；最右侧保留日期留白。</span>
+        </div>
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Model + benchmark timeline</h2>
+            <span id="timelineSummary">--</span>
+          </div>
+          <div class="toolbar compact-toolbar">
+            <label class="field compact">
+              <span>Timeline view</span>
+              <select id="timelineViewMode">
+                <option value="combined" selected>Model + benchmark</option>
+                <option value="models">Models only</option>
+                <option value="benchmarks">Benchmarks only</option>
+              </select>
+            </label>
+            <label class="field compact">
+              <span>Benchmark metric</span>
+              <select id="benchmarkTimelineMetric">
+                <option value="difficulty_b_scaled" selected>Difficulty × scale</option>
+                <option value="difficulty_b">Difficulty b</option>
+                <option value="difficulty_score">Predicted difficulty</option>
+                <option value="difficulty_weight">Difficulty weight</option>
+              </select>
+            </label>
+            <button id="resetTimelineZoom" class="tool-button" type="button" disabled title="Mouse wheel to zoom; drag after zooming to pan">Reset zoom</button>
+          </div>
+          <div class="timeline-frame">
+            <div class="timeline-chart">
+              <canvas id="timelineCanvas" width="1200" height="560"></canvas>
+              <div id="timelineHitLayer" class="timeline-hit-layer"></div>
+              <div id="timelineTooltip" class="timeline-tooltip" hidden></div>
+            </div>
+            <div id="canvasFamilyLegend" class="canvas-family-legend" aria-label="Model family filter"></div>
+          </div>
+        </section>
+      </section>
+
+      <section class="view active" id="fitView">
+        <div class="module-title">
+          <div>
+            <p class="eyebrow">Module 02</p>
+            <h2>原始拟合可视化</h2>
+          </div>
+          <span>展示预测拟合摘要；远端快照缺少 raw score rows 时会明确提示。</span>
+        </div>
+        <section class="panel fit-image-panel">
+          <div class="panel-head">
+            <h2>原始拟合可视化</h2>
+            <span id="fitImageSource">公开拟合摘要图</span>
+          </div>
+          <div class="fit-image-wrap">
+            <img id="fitImage" src="" alt="拟合可视化：predicted value 与 gold value 对比" />
+          </div>
+        </section>
+        <section class="panel">
+          <div class="panel-head">
+            <h2>预测拟合摘要</h2>
+            <span id="fitSummary">--</span>
+          </div>
+          <canvas id="fitCanvas" width="900" height="420"></canvas>
+        </section>
+        <section class="panel">
+          <div class="panel-head">
+            <h2>最大误差样本</h2>
+            <span>按 |predicted - actual| 排序</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Benchmark</th><th>Model</th><th>Actual</th><th>Pred</th><th>Error</th></tr>
+              </thead>
+              <tbody id="fitTable"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <section class="view active" id="heatmapsView">
+        <div class="module-title">
+          <div>
+            <p class="eyebrow">Module 03</p>
+            <h2>热力图</h2>
+          </div>
+          <span>模型、benchmark 与语义 tag 的矩阵视图。</span>
+        </div>
+        <div class="toolbar">
+          <label class="field compact">
+            <span>矩阵</span>
+            <select id="heatmapType">
+              <option value="modelTags" selected>Models × semantic tags</option>
+              <option value="models">Models capability</option>
+              <option value="benchmarks">Benchmarks difficulty</option>
+            </select>
+          </label>
+          <label class="field compact">
+            <span>行数</span>
+            <input id="heatmapLimit" type="number" min="10" max="120" step="10" value="60" />
+          </label>
+        </div>
+        <section class="panel">
+          <div class="panel-head">
+            <h2 id="heatmapTitle">Capability heatmap</h2>
+            <span>红高蓝低，按综合分排序</span>
+          </div>
+          <div id="heatmap" class="heatmap"></div>
+        </section>
+      </section>
+
+      <section class="view active" id="modelsView">
+        <div class="module-title">
+          <div>
+            <p class="eyebrow">Module 04</p>
+            <h2>模型能力值</h2>
+          </div>
+          <span>展示本地 agg MIRT k=19 seed=30890121 的 difficulty-weighted 综合排名；也可按 latent dim 排序查看单个潜在维度。</span>
+        </div>
+        <div class="toolbar">
+          <label class="field">
+            <span>搜索模型</span>
+            <input id="modelSearch" type="search" placeholder="DeepSeek, GPT, Claude..." />
+          </label>
+          <label class="field compact">
+            <span>排序</span>
+            <select id="modelSort"></select>
+          </label>
+          <label class="field compact">
+            <span>显示数量</span>
+            <input id="modelLimit" type="number" min="5" max="208" step="5" value="40" />
+          </label>
+        </div>
+        <div class="split">
+          <section class="panel table-panel">
+            <div class="panel-head">
+              <h2>模型能力榜</h2>
+              <span id="modelResultCount">--</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Rank</th><th>Model</th><th>L2</th></tr>
+                </thead>
+                <tbody id="modelTable"></tbody>
+              </table>
+            </div>
+          </section>
+          <section class="panel detail-panel">
+            <div class="panel-head">
+              <h2 id="modelDetailTitle">选择一个模型</h2>
+              <span id="modelDetailScore">--</span>
+            </div>
+            <div id="modelBars" class="bar-list"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="view active" id="benchmarksView">
+        <div class="module-title">
+          <div>
+            <p class="eyebrow">Module 05</p>
+            <h2>Benchmark 难度</h2>
+          </div>
+          <span>默认使用公式难度的 b × scale；可切换原始 b、预测难度和 ranking weight 做诊断。</span>
+        </div>
+        <div class="toolbar">
+          <label class="field">
+            <span>搜索 Benchmark</span>
+            <input id="benchmarkSearch" type="search" placeholder="AIME, MMLU, Aider..." />
+          </label>
+          <label class="field compact">
+            <span>排序</span>
+            <select id="benchmarkSort"></select>
+          </label>
+          <label class="field compact">
+            <span>Tag</span>
+            <select id="tagFilter"></select>
+          </label>
+        </div>
+        <div class="split">
+          <section class="panel table-panel">
+            <div class="panel-head">
+              <h2>Benchmark 难度榜</h2>
+              <span id="benchmarkResultCount">--</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Rank</th><th>Benchmark</th><th>Selected metric</th><th>Pred diff</th><th>Top tag</th></tr>
+                </thead>
+                <tbody id="benchmarkTable"></tbody>
+              </table>
+            </div>
+          </section>
+          <section class="panel detail-panel">
+            <div class="panel-head">
+              <h2 id="benchmarkDetailTitle">选择一个 benchmark</h2>
+              <span id="benchmarkDetailScore">--</span>
+            </div>
+            <div id="benchmarkTags" class="tag-row"></div>
+            <h3>Tag scores</h3>
+            <div id="benchmarkBars" class="bar-list"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="view active" id="tagsView">
+        <div class="module-title">
+          <div>
+            <p class="eyebrow">Module 06</p>
+            <h2>标签解释</h2>
+          </div>
+          <span>原版中文 rubric 解释，并叠加筛选后的标签分布。</span>
+        </div>
+        <section class="panel">
+          <div class="panel-head">
+            <h2>筛选后标签分布</h2>
+            <span>解释来自公开标签说明，分布来自聚合统计</span>
+          </div>
+          <div id="tagCards" class="tag-grid"></div>
+        </section>
+      </section>
+    </main>
+
+    <script src="./app.js?v=20260618-heatmap-multihue"></script>
+  </body>
+</html>
