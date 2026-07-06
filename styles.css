@@ -522,7 +522,7 @@ td.name-cell {
   position: relative;
   align-items: initial;
   justify-content: initial;
-  height: 108px;
+  height: 124px;
   font-size: 11px;
   line-height: 1.15;
   overflow: visible;
@@ -534,14 +534,14 @@ td.name-cell {
 .tag-heatmap .heat-col-label span {
   position: absolute;
   right: 50%;
-  bottom: 10px;
+  bottom: 8px;
   max-width: none;
   max-height: none;
   overflow: visible;
   text-align: right;
   text-overflow: clip;
-  transform: rotate(-42deg);
-  transform-origin: right center;
+  transform: rotate(42deg);
+  transform-origin: right bottom;
   white-space: nowrap;
 }
 
