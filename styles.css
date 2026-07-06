@@ -533,15 +533,15 @@ td.name-cell {
 
 .tag-heatmap .heat-col-label span {
   position: absolute;
-  left: 50%;
-  bottom: 8px;
+  right: 50%;
+  top: 10px;
   max-width: none;
   max-height: none;
   overflow: visible;
-  text-align: left;
+  text-align: right;
   text-overflow: clip;
   transform: rotate(-42deg);
-  transform-origin: left bottom;
+  transform-origin: right top;
   white-space: nowrap;
 }
 

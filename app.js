@@ -605,7 +605,7 @@ function renderHeatmap() {
   const columnLabels = columns
     .map((column, index) => {
       const fit = tagFitByName.get(column);
-      const label = type === "modelTags" && fit ? `${column} (${fmt(fit.spearman_CV, 2)})` : (type === "modelTags" ? column : `dim_${index}`);
+      const label = type === "modelTags" ? column : `dim_${index}`;
       const titleText = fit ? `${column} · bridge CV Spearman ${fmt(fit.spearman_CV, 3)}` : column;
       return `<div class="heat-col-label" title="${escapeHtml(titleText)}"><span>${escapeHtml(label)}</span></div>`;
     })
