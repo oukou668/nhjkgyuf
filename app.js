@@ -70,6 +70,7 @@ const els = {
   benchmarkBars: $("#benchmarkBars"),
   weightBars: $("#weightBars"),
   heatmapType: $("#heatmapType"),
+  heatmapSortTag: $("#heatmapSortTag"),
   heatmapLimit: $("#heatmapLimit"),
   heatmapTitle: $("#heatmapTitle"),
   heatmap: $("#heatmap"),
@@ -245,6 +246,15 @@ function renderSortOptions() {
     : "difficulty_b_scaled";
 }
 
+function renderHeatmapSortOptions() {
+  const tags = state.data.tag_bridge?.tags?.length ? state.data.tag_bridge.tags : state.data.tags;
+  const current = els.heatmapSortTag.value || "";
+  els.heatmapSortTag.innerHTML = `<option value="">Overall / bridge score</option>${tags
+    .map((tag) => `<option value="${escapeHtml(tag)}">${escapeHtml(tag)}</option>`)
+    .join("")}`;
+  els.heatmapSortTag.value = tags.includes(current) ? current : "";
+}
+
 function populateControls() {
   const runs = trainingRuns();
   state.selectedRunTag = runs.some((run) => run.metadata.run_tag === state.data.metadata.run_tag)
@@ -258,6 +268,7 @@ function populateControls() {
   els.tagFilter.innerHTML = `<option value="">All tags</option>${state.data.tags
     .map((tag) => `<option value="${escapeHtml(tag)}">${escapeHtml(tag)}</option>`)
     .join("")}`;
+  renderHeatmapSortOptions();
   els.heatmapType.value = "modelTags";
 }
 
@@ -531,6 +542,7 @@ function renderHeatmap() {
   const run = activeRun();
   const type = els.heatmapType.value;
   const limit = Number(els.heatmapLimit.value) || 60;
+  const sortTag = type === "modelTags" ? els.heatmapSortTag.value : "";
   let rows;
   let vectorKey;
   let labelKey;
@@ -543,6 +555,7 @@ function renderHeatmap() {
     const modelTagRows = tagBridge?.models?.length
       ? tagBridge.models
       : (run.models.some((model) => model.tag_scores) ? run.models : state.data.models);
+    const sortTagIndex = sortTag ? columns.indexOf(sortTag) : -1;
     rows = modelTagRows
       .map((model) => ({
         model: model.model,
@@ -552,6 +565,10 @@ function renderHeatmap() {
         bridge_rank_score: model.bridge_rank_score ?? null,
       }))
       .sort((a, b) => {
+        if (sortTagIndex >= 0) {
+          const tagDelta = (b.tag_values[sortTagIndex] ?? 0) - (a.tag_values[sortTagIndex] ?? 0);
+          if (Math.abs(tagDelta) > 1e-12) return tagDelta;
+        }
         if (tagBridge?.models?.length) return (b.bridge_rank_score ?? 0) - (a.bridge_rank_score ?? 0);
         return b.capability_sum - a.capability_sum;
       })
@@ -581,6 +598,7 @@ function renderHeatmap() {
   const columnStats = type === "modelTags" ? buildColumnStats(rows, vectorKey, columns.length) : [];
 
   els.heatmapTitle.textContent = title;
+  els.heatmapSortTag.disabled = type !== "modelTags";
   els.heatmap.style.setProperty("--dim-count", columns.length);
   els.heatmap.classList.toggle("tag-heatmap", type === "modelTags");
   const tagFitByName = new Map((tagBridge?.fit || []).map((entry) => [entry.tag, entry]));
@@ -1807,7 +1825,7 @@ function bindEvents() {
     renderBenchmarks();
     renderBenchmarkDetail();
   }));
-  [els.heatmapType, els.heatmapLimit].forEach((el) => el.addEventListener("input", renderHeatmap));
+  [els.heatmapType, els.heatmapSortTag, els.heatmapLimit].forEach((el) => el.addEventListener("input", renderHeatmap));
   els.timelineViewMode.addEventListener("input", () => {
     if (state.timelineAnimation) cancelAnimationFrame(state.timelineAnimation);
     state.timelineAnimation = null;

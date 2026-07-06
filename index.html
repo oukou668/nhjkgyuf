@@ -8,7 +8,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     <title>Meta Evaluation</title>
-    <link rel="stylesheet" href="./styles.css?v=20260706-heatmap-values" />
+    <link rel="stylesheet" href="./styles.css?v=20260706-heatmap-tag-sort" />
   </head>
   <body class="hero-mode">
     <nav class="site-topbar" aria-label="Primary navigation">
@@ -147,6 +147,12 @@
             </select>
           </label>
           <label class="field compact">
+            <span>排序 tag</span>
+            <select id="heatmapSortTag">
+              <option value="">Overall / bridge score</option>
+            </select>
+          </label>
+          <label class="field compact">
             <span>行数</span>
             <input id="heatmapLimit" type="number" min="10" max="120" step="10" value="60" />
           </label>
@@ -154,7 +160,7 @@
         <section class="panel">
           <div class="panel-head">
             <h2 id="heatmapTitle">Capability heatmap</h2>
-            <span>红高蓝低，按综合分排序</span>
+            <span>红高蓝低，可按综合分或单个 tag 分数排序</span>
           </div>
           <div id="heatmap" class="heatmap"></div>
         </section>
@@ -274,6 +280,6 @@
       </section>
     </main>
 
-    <script src="./app.js?v=20260706-heatmap-values"></script>
+    <script src="./app.js?v=20260706-heatmap-tag-sort"></script>
   </body>
 </html>
