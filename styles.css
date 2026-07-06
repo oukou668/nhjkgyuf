@@ -449,7 +449,7 @@ td.name-cell {
 
 .heat-row {
   display: grid;
-  grid-template-columns: 220px repeat(var(--dim-count), var(--heat-cell-width, 28px));
+  grid-template-columns: 220px repeat(var(--dim-count), var(--heat-cell-width, 48px));
   gap: 2px;
   align-items: center;
 }
@@ -486,7 +486,7 @@ td.name-cell {
   display: flex;
   align-items: end;
   justify-content: center;
-  width: var(--heat-cell-width, 28px);
+  width: var(--heat-cell-width, 48px);
   height: 56px;
   color: var(--muted);
   font-size: 10px;
@@ -512,7 +512,7 @@ td.name-cell {
 }
 
 .tag-heatmap {
-  --heat-cell-width: 42px;
+  --heat-cell-width: 58px;
   gap: 0;
   max-height: none;
   overflow: hidden;
@@ -541,11 +541,28 @@ td.name-cell {
 }
 
 .heat-cell {
-  width: var(--heat-cell-width, 28px);
-  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--heat-cell-width, 48px);
+  height: 24px;
   border: 1px solid rgba(8, 43, 92, 0.22);
   border-radius: 3px;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.32);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.22);
+}
+
+.heat-cell span {
+  display: block;
+  max-width: calc(var(--heat-cell-width, 48px) - 4px);
+  overflow: hidden;
+  text-overflow: clip;
+  white-space: nowrap;
 }
 
 .tag-grid {

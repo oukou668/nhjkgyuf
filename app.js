@@ -111,6 +111,17 @@ function valueColor(value, maxAbs) {
   return signedHeatColor(value, t);
 }
 
+function heatCellTextColor(background) {
+  const match = String(background).match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+  if (!match) return "#132033";
+  const [, rRaw, gRaw, bRaw] = match;
+  const r = Number(rRaw);
+  const g = Number(gRaw);
+  const b = Number(bRaw);
+  const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+  return luminance > 0.58 ? "#132033" : "#ffffff";
+}
+
 function interpolateColor(a, b, t) {
   const mix = a.map((value, index) => Math.round(value + (b[index] - value) * t));
   return `rgb(${mix[0]}, ${mix[1]}, ${mix[2]})`;
@@ -598,7 +609,8 @@ function renderHeatmap() {
               : valueColor(value, maxAbs);
             const fit = tagFitByName.get(columns[index]);
             const cvText = fit ? ` · CV ${fmt(fit.spearman_CV, 3)}` : "";
-            return `<div class="heat-cell" title="${escapeHtml(columns[index])}: ${fmt(value, 4)}${cvText}" style="background: ${background}"></div>`;
+            const textColor = heatCellTextColor(background);
+            return `<div class="heat-cell" title="${escapeHtml(columns[index])}: ${fmt(value, 4)}${cvText}" style="background: ${background}; color: ${textColor}"><span>${fmt(value, 2)}</span></div>`;
           })
           .join("")}
       </div>`
