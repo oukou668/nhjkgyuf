@@ -1863,7 +1863,7 @@ function bindEvents() {
 
 async function init() {
   const dataUrl = new URL("./data/dashboard_data_20260616.json", window.location.href);
-  dataUrl.searchParams.set("v", "20260618-public-sanitized");
+  dataUrl.searchParams.set("v", "20260707-k19-seed30890121-tag-bridge");
   dataUrl.searchParams.set("t", String(Date.now()));
   const response = await fetch(dataUrl, { cache: "no-store" });
   if (!response.ok) throw new Error(`Failed to load ${dataUrl.pathname}: ${response.status}`);
