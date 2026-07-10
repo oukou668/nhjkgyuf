@@ -785,7 +785,7 @@ td.name-cell {
 #timelineCanvas {
   display: block;
   width: 100%;
-  height: 560px;
+  height: 680px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #fbfdff;
@@ -808,7 +808,7 @@ td.name-cell {
   flex-direction: column;
   gap: 8px;
   align-self: stretch;
-  max-height: 560px;
+  max-height: 680px;
   padding: 2px 0;
   overflow-y: auto;
 }

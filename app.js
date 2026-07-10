@@ -33,7 +33,7 @@ const BENCHMARK_DIFFICULTY_METRICS = {
   difficulty_weight: { label: "Difficulty weight", shortLabel: "ranking weight" },
 };
 const TIMELINE_VIEW_MODES = {
-  combined: "Model + benchmark",
+  combined: "Model + benchmark linked",
   models: "Models only",
   benchmarks: "Benchmarks only",
 };
@@ -952,9 +952,9 @@ function drawTimelineLegend(ctx, width, pad, mode, metricLabel) {
     ? [{ type: "benchmark", label: `Benchmark · ${metricLabel}` }]
     : [
         { type: "model", label: `Model · ${TIMELINE_DISPLAY_LABEL}` },
-        { type: "benchmark", label: mode === "combined" ? `Benchmark · ${metricLabel} · right axis` : `Benchmark · ${metricLabel}` },
+        { type: "benchmark", label: `Benchmark · ${metricLabel}` },
       ];
-  const legendW = mode === "benchmarks" ? 188 : mode === "combined" ? 374 : 296;
+  const legendW = mode === "benchmarks" ? 188 : mode === "combined" ? 322 : 296;
   const x0 = Math.max(pad.left + 12, width - pad.right - legendW);
   const y0 = pad.top - 46;
   let x = x0 + 12;
@@ -1209,7 +1209,7 @@ function renderTimeline(animation = null) {
 
   const pad = {
     left: isHeroMode ? 94 : 70,
-    right: mode === "combined" ? (isHeroMode ? 122 : 102) : (isHeroMode ? 64 : 48),
+    right: isHeroMode ? 64 : 48,
     top: isHeroMode ? 88 : 82,
     bottom: isHeroMode ? 94 : 58,
   };
@@ -1222,34 +1222,39 @@ function renderTimeline(animation = null) {
   const modelPad = Math.max(0.001, (modelMaxRaw - modelMinRaw) * 0.08);
   const rawModelMin = modelMinRaw - modelPad;
   const rawModelMax = modelMaxRaw + modelPad;
-  let minX = state.timelineZoom?.minX ?? rawMinX;
-  let maxX = state.timelineZoom?.maxX ?? rawMaxX;
-  let minY = state.timelineZoom?.minY ?? (mode === "benchmarks" ? 0 : rawModelMin);
-  let maxY = state.timelineZoom?.maxY ?? (mode === "benchmarks" ? 100 : rawModelMax);
-  const xSpan = maxX - minX || 1;
-  const ySpan = maxY - minY || 1;
-  const axisRight = width - pad.right;
-  const plotW = axisRight - pad.left;
-  const plotH = height - pad.top - pad.bottom;
-  const modelTop = pad.top;
-  const modelBottom = height - pad.bottom;
-  const modelH = modelBottom - modelTop;
-  const xScale = (value) => pad.left + ((value - minX) / xSpan) * plotW;
-  const yScale = (value) => modelTop + (1 - (value - minY) / ySpan) * modelH;
-
   const benchValues = benchmarkPoints.map((point) => point.metricValue).filter(Number.isFinite);
   const hasBenchAxis = benchValues.length > 0;
+  const splitCombined = mode === "combined" && hasBenchAxis;
   const benchMinRaw = hasBenchAxis ? Math.min(...benchValues) : 0;
   const benchMaxRaw = hasBenchAxis ? Math.max(...benchValues) : 1;
   const benchPad = Math.max(0.001, (benchMaxRaw - benchMinRaw) * 0.12);
   const rawBenchMin = benchMinRaw - benchPad;
   const rawBenchMax = benchMaxRaw + benchPad;
+  let minX = state.timelineZoom?.minX ?? rawMinX;
+  let maxX = state.timelineZoom?.maxX ?? rawMaxX;
+  let minY = splitCombined ? rawModelMin : (state.timelineZoom?.minY ?? (mode === "benchmarks" ? rawBenchMin : rawModelMin));
+  let maxY = splitCombined ? rawModelMax : (state.timelineZoom?.maxY ?? (mode === "benchmarks" ? rawBenchMax : rawModelMax));
+  const xSpan = maxX - minX || 1;
+  const ySpan = maxY - minY || 1;
+  const axisRight = width - pad.right;
+  const plotW = axisRight - pad.left;
+  const plotH = height - pad.top - pad.bottom;
+  const panelGap = splitCombined ? (isHeroMode ? 38 : 32) : 0;
+  const modelTop = pad.top;
+  const modelBottom = splitCombined
+    ? modelTop + Math.floor((plotH - panelGap) * 0.56)
+    : height - pad.bottom;
+  const modelH = modelBottom - modelTop;
+  const benchTop = splitCombined ? modelBottom + panelGap : pad.top;
+  const benchBottom = height - pad.bottom;
+  const benchH = benchBottom - benchTop;
+  const xScale = (value) => pad.left + ((value - minX) / xSpan) * plotW;
+  const yScale = (value) => modelTop + (1 - (value - minY) / ySpan) * modelH;
+
   const benchMin = mode === "benchmarks" && state.timelineZoom ? minY : rawBenchMin;
   const benchMax = mode === "benchmarks" && state.timelineZoom ? maxY : rawBenchMax;
   const benchSpan = benchMax - benchMin || 1;
-  const benchMainYScale = (value) => pad.top + (1 - (value - benchMin) / benchSpan) * plotH;
-  const benchmarkModelValue = (value) => rawModelMin + ((value - rawBenchMin) / (rawBenchMax - rawBenchMin || 1)) * (rawModelMax - rawModelMin || 1);
-  const benchmarkValueFromModelValue = (value) => rawBenchMin + ((value - rawModelMin) / (rawModelMax - rawModelMin || 1)) * (rawBenchMax - rawBenchMin || 1);
+  const benchMainYScale = (value) => benchTop + (1 - (value - benchMin) / benchSpan) * benchH;
   const modelInView = (point) =>
     point.dateMs >= minX &&
     point.dateMs <= maxX &&
@@ -1261,7 +1266,7 @@ function renderTimeline(animation = null) {
     (mode === "benchmarks"
       ? point.metricValue >= benchMin && point.metricValue <= benchMax
       : mode === "combined"
-      ? benchmarkModelValue(point.metricValue) >= minY && benchmarkModelValue(point.metricValue) <= maxY
+      ? point.metricValue >= rawBenchMin && point.metricValue <= rawBenchMax
       : true);
   const drawModelPointsInView = drawModelPoints.filter(modelInView);
   const drawBenchmarkPointsInView = drawBenchmarkPoints.filter(benchmarkInView);
@@ -1269,18 +1274,22 @@ function renderTimeline(animation = null) {
     axisRight,
     benchMax,
     benchMin,
-    eventBottom: modelBottom,
+    eventBottom: splitCombined ? benchBottom : modelBottom,
     eventTop: modelTop,
     maxX,
     maxY: mode === "benchmarks" ? benchMax : maxY,
     minX,
     minY: mode === "benchmarks" ? benchMin : minY,
+    lockY: splitCombined,
     mode,
+    panelGap,
+    benchBottom,
+    benchTop,
     modelBottom,
     modelTop,
     padLeft: pad.left,
-    plotBottom: modelBottom,
-    plotTop: mode === "benchmarks" ? pad.top : modelTop,
+    plotBottom: splitCombined ? benchBottom : modelBottom,
+    plotTop: splitCombined ? modelTop : (mode === "benchmarks" ? benchTop : modelTop),
     rawMaxX,
     rawMaxY: mode === "benchmarks" ? rawBenchMax : rawModelMax,
     rawMinX,
@@ -1292,32 +1301,41 @@ function renderTimeline(animation = null) {
   ctx.fillStyle = "#5f7088";
   ctx.font = "12px system-ui";
   ctx.textAlign = "right";
-  if (mode === "benchmarks" && hasBenchAxis) {
+  const drawYGrid = (minValue, span, scale, top, bottom, labelDigits) => {
     for (let i = 0; i <= 5; i += 1) {
-      const value = benchMin + (benchSpan * i) / 5;
-      const y = benchMainYScale(value);
-      ctx.beginPath();
-      ctx.moveTo(pad.left, y);
-      ctx.lineTo(axisRight, y);
-      ctx.stroke();
-      ctx.fillText(fmt(value, 2), pad.left - 10, y + 4);
-    }
-  } else {
-    for (let i = 0; i <= 5; i += 1) {
-      const value = minY + (ySpan * i) / 5;
-      const y = yScale(value);
+      const value = minValue + (span * i) / 5;
+      const y = scale(value);
       ctx.beginPath();
       ctx.moveTo(pad.left, y);
       ctx.lineTo(axisRight, y);
       ctx.stroke();
       ctx.textAlign = "right";
-      ctx.fillText(fmt(value, 3), pad.left - 10, y + 4);
-      if (mode === "combined" && hasBenchAxis) {
-        ctx.textAlign = "left";
-        ctx.fillStyle = "#1f68b3";
-        ctx.fillText(fmt(benchmarkValueFromModelValue(value), 2), axisRight + 10, y + 4);
-        ctx.fillStyle = "#5f7088";
-      }
+      ctx.fillStyle = "#5f7088";
+      ctx.fillText(fmt(value, labelDigits), pad.left - 10, y + 4);
+    }
+    ctx.strokeStyle = "#14233a";
+    ctx.beginPath();
+    ctx.moveTo(pad.left, top);
+    ctx.lineTo(pad.left, bottom);
+    ctx.lineTo(axisRight, bottom);
+    ctx.stroke();
+    ctx.strokeStyle = "#cfe0f2";
+  };
+
+  if (mode === "benchmarks" && hasBenchAxis) {
+    drawYGrid(benchMin, benchSpan, benchMainYScale, benchTop, benchBottom, 2);
+  } else {
+    drawYGrid(minY, ySpan, yScale, modelTop, modelBottom, 3);
+    if (splitCombined) {
+      drawYGrid(benchMin, benchSpan, benchMainYScale, benchTop, benchBottom, 2);
+      ctx.strokeStyle = "#14233a";
+      ctx.globalAlpha = 0.3;
+      ctx.beginPath();
+      ctx.moveTo(pad.left, modelBottom);
+      ctx.lineTo(pad.left, benchTop);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = "#cfe0f2";
     }
   }
 
@@ -1327,23 +1345,26 @@ function renderTimeline(animation = null) {
   for (let year = minYear; year <= maxYear; year += 1) {
     const x = xScale(new Date(`${year}-01-01T00:00:00`).getTime());
     if (x < pad.left || x > axisRight) continue;
-    ctx.beginPath();
-    ctx.moveTo(x, pad.top);
-    ctx.lineTo(x, height - pad.bottom);
-    ctx.stroke();
+    const verticalSegments = splitCombined
+      ? [[modelTop, benchBottom]]
+      : [[mode === "benchmarks" ? benchTop : modelTop, mode === "benchmarks" ? benchBottom : modelBottom]];
+    verticalSegments.forEach(([segmentTop, segmentBottom]) => {
+      ctx.beginPath();
+      ctx.moveTo(x, segmentTop);
+      ctx.lineTo(x, segmentBottom);
+      ctx.stroke();
+    });
     ctx.fillText(String(year), x, height - pad.bottom + 24);
   }
 
-  ctx.strokeStyle = "#14233a";
-  ctx.beginPath();
-  ctx.moveTo(pad.left, mode === "benchmarks" ? pad.top : modelTop);
-  ctx.lineTo(pad.left, modelBottom);
-  ctx.lineTo(axisRight, modelBottom);
-  if (mode === "combined" && hasBenchAxis) {
-    ctx.moveTo(axisRight, modelBottom);
-    ctx.lineTo(axisRight, modelTop);
+  if (splitCombined) {
+    ctx.fillStyle = "#14233a";
+    ctx.font = "13px system-ui";
+    ctx.textAlign = "left";
+    ctx.fillText("Models", pad.left + 8, modelTop - 14);
+    ctx.fillStyle = "#1f68b3";
+    ctx.fillText("Benchmarks", pad.left + 8, benchTop - 14);
   }
-  ctx.stroke();
 
   drawTimelineLegend(ctx, width, pad, mode, metricLabel);
 
@@ -1414,7 +1435,7 @@ function renderTimeline(animation = null) {
   if (mode === "combined" && hasBenchAxis) {
     drawBenchmarkPointsInView.forEach((point) => {
       const x = xScale(point.dateMs);
-      const y = yScale(benchmarkModelValue(point.metricValue));
+      const y = benchMainYScale(point.metricValue);
       const strength = clamp((point.metricValue - benchMinRaw) / (benchMaxRaw - benchMinRaw || 1), 0, 1);
       const radius = 3.3 + strength * 1.9;
       point.canvasX = x;
@@ -1438,9 +1459,21 @@ function renderTimeline(animation = null) {
   ctx.font = "12px system-ui";
   ctx.textAlign = "center";
   ctx.fillText("Release date", pad.left + plotW / 2, isHeroMode ? height - 58 : height - 12);
-  if (mode === "benchmarks") {
+  if (splitCombined) {
     ctx.save();
-    ctx.translate(20, pad.top + plotH / 2);
+    ctx.translate(20, modelTop + modelH / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillText(TIMELINE_DISPLAY_LABEL, 0, 0);
+    ctx.restore();
+    ctx.save();
+    ctx.fillStyle = "#1f68b3";
+    ctx.translate(20, benchTop + benchH / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillText(`Benchmark ${metricLabel}`, 0, 0);
+    ctx.restore();
+  } else if (mode === "benchmarks") {
+    ctx.save();
+    ctx.translate(20, benchTop + benchH / 2);
     ctx.rotate(-Math.PI / 2);
     ctx.fillText(`Benchmark ${metricLabel}`, 0, 0);
     ctx.restore();
@@ -1450,14 +1483,6 @@ function renderTimeline(animation = null) {
     ctx.rotate(-Math.PI / 2);
     ctx.fillText(TIMELINE_DISPLAY_LABEL, 0, 0);
     ctx.restore();
-    if (mode === "combined" && hasBenchAxis) {
-      ctx.save();
-      ctx.fillStyle = "#1f68b3";
-      ctx.translate(width - 24, modelTop + modelH / 2);
-      ctx.rotate(Math.PI / 2);
-      ctx.fillText(`Benchmark ${metricLabel}`, 0, 0);
-      ctx.restore();
-    }
   }
 
   const hitPoints = animation?.animating ? [] : [
@@ -1520,10 +1545,10 @@ function clampTimelineZoom(zoom, plot = state.timelinePlot) {
   const rawXSpan = plot.rawMaxX - plot.rawMinX || 1;
   const rawYSpan = plot.rawMaxY - plot.rawMinY || 1;
   let xSpan = clamp(zoom.maxX - zoom.minX, rawXSpan / 120, rawXSpan);
-  let ySpan = clamp(zoom.maxY - zoom.minY, rawYSpan / 80, rawYSpan);
+  let ySpan = plot.lockY ? rawYSpan : clamp(zoom.maxY - zoom.minY, rawYSpan / 80, rawYSpan);
   let minX = zoom.minX;
   let maxX = minX + xSpan;
-  let minY = zoom.minY;
+  let minY = plot.lockY ? plot.rawMinY : zoom.minY;
   let maxY = minY + ySpan;
 
   if (minX < plot.rawMinX) {
@@ -1534,17 +1559,20 @@ function clampTimelineZoom(zoom, plot = state.timelinePlot) {
     maxX = plot.rawMaxX;
     minX = maxX - xSpan;
   }
-  if (minY < plot.rawMinY) {
+  if (plot.lockY) {
+    minY = plot.rawMinY;
+    maxY = plot.rawMaxY;
+  } else if (minY < plot.rawMinY) {
     minY = plot.rawMinY;
     maxY = minY + ySpan;
   }
-  if (maxY > plot.rawMaxY) {
+  if (!plot.lockY && maxY > plot.rawMaxY) {
     maxY = plot.rawMaxY;
     minY = maxY - ySpan;
   }
 
   const isFullX = Math.abs(minX - plot.rawMinX) < 1 && Math.abs(maxX - plot.rawMaxX) < 1;
-  const isFullY = Math.abs(minY - plot.rawMinY) < 0.001 && Math.abs(maxY - plot.rawMaxY) < 0.001;
+  const isFullY = plot.lockY || (Math.abs(minY - plot.rawMinY) < 0.001 && Math.abs(maxY - plot.rawMaxY) < 0.001);
   return isFullX && isFullY ? null : { minX, maxX, minY, maxY };
 }
 
@@ -1718,7 +1746,7 @@ function renderFit() {
 }
 
 function fitImagePath(runTag) {
-  return `./assets/fit_${runTag}.png?v=20260618-public`;
+  return `./assets/fit_${runTag}.png?v=20260521-remote`;
 }
 
 function renderFitImage() {
@@ -1726,7 +1754,7 @@ function renderFitImage() {
   const runTag = run.metadata.run_tag?.startsWith("extend") ? run.metadata.run_tag : FIT_IMAGE_FALLBACK_RUN_TAG;
   els.fitImage.src = fitImagePath(runTag);
   els.fitImage.alt = `拟合可视化：${runTag}`;
-  els.fitImageSource.textContent = `公开拟合摘要图：${runTag}`;
+  els.fitImageSource.textContent = `远端 outputs/model_fit/train_${runTag}.pdf`;
 }
 
 function canvasSetup(canvas) {

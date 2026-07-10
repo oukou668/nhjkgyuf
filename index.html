@@ -51,18 +51,18 @@
             <p class="eyebrow">Module 01</p>
             <h2>能力时间线</h2>
           </div>
-          <span>横轴是发布时间；model 使用左轴原始 score，benchmark 使用右轴 metric；最右侧保留日期留白。</span>
+          <span>横轴是发布时间；model 与 benchmark 上下分面、共享时间轴，各自使用独立纵轴。</span>
         </div>
         <section class="panel">
           <div class="panel-head">
-            <h2>Model + benchmark timeline</h2>
+            <h2>Model / benchmark linked timeline</h2>
             <span id="timelineSummary">--</span>
           </div>
           <div class="toolbar compact-toolbar">
             <label class="field compact">
               <span>Timeline view</span>
               <select id="timelineViewMode">
-                <option value="combined" selected>Model + benchmark</option>
+                <option value="combined" selected>Model + benchmark linked</option>
                 <option value="models">Models only</option>
                 <option value="benchmarks">Benchmarks only</option>
               </select>
@@ -80,7 +80,7 @@
           </div>
           <div class="timeline-frame">
             <div class="timeline-chart">
-              <canvas id="timelineCanvas" width="1200" height="560"></canvas>
+              <canvas id="timelineCanvas" width="1200" height="680"></canvas>
               <div id="timelineHitLayer" class="timeline-hit-layer"></div>
               <div id="timelineTooltip" class="timeline-tooltip" hidden></div>
             </div>
@@ -100,7 +100,7 @@
         <section class="panel fit-image-panel">
           <div class="panel-head">
             <h2>原始拟合可视化</h2>
-            <span id="fitImageSource">公开拟合摘要图</span>
+            <span id="fitImageSource">来自远端 outputs/model_fit 的 PDF 转图</span>
           </div>
           <div class="fit-image-wrap">
             <img id="fitImage" src="" alt="拟合可视化：predicted value 与 gold value 对比" />
@@ -273,7 +273,7 @@
         <section class="panel">
           <div class="panel-head">
             <h2>筛选后标签分布</h2>
-            <span>解释来自公开标签说明，分布来自聚合统计</span>
+            <span>解释来自原版 rubrics.json，分布来自 tag_activity_stats.csv</span>
           </div>
           <div id="tagCards" class="tag-grid"></div>
         </section>
