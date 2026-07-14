@@ -1751,7 +1751,15 @@ function fitImagePath(runTag) {
 
 function renderFitImage() {
   const run = activeRun();
+  if (run.metadata.source_name === "local_finetune") {
+    els.fitImage.hidden = true;
+    els.fitImage.removeAttribute("src");
+    els.fitImage.alt = "当前 freeze 运行未提供拟合图";
+    els.fitImageSource.textContent = "当前 freeze 下载仅包含参数与诊断数据，未包含 outputs/model_fit 拟合图";
+    return;
+  }
   const runTag = run.metadata.run_tag?.startsWith("extend") ? run.metadata.run_tag : FIT_IMAGE_FALLBACK_RUN_TAG;
+  els.fitImage.hidden = false;
   els.fitImage.src = fitImagePath(runTag);
   els.fitImage.alt = `拟合可视化：${runTag}`;
   els.fitImageSource.textContent = `远端 outputs/model_fit/train_${runTag}.pdf`;
@@ -1891,7 +1899,7 @@ function bindEvents() {
 
 async function init() {
   const dataUrl = new URL("./data/dashboard_data_20260616.json", window.location.href);
-  dataUrl.searchParams.set("v", "20260707-k19-seed30890121-tag-bridge");
+  dataUrl.searchParams.set("v", "20260713-freeze-finetune");
   dataUrl.searchParams.set("t", String(Date.now()));
   const response = await fetch(dataUrl, { cache: "no-store" });
   if (!response.ok) throw new Error(`Failed to load ${dataUrl.pathname}: ${response.status}`);
