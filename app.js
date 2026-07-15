@@ -340,7 +340,7 @@ function renderModels() {
   const timelineRanks = timelineRankMap();
   const modelRows = run.models.map((model) => ({
     ...model,
-    timeline_rank: timelineRanks.get(model.model) ?? Infinity,
+    timeline_rank: model.rank ?? timelineRanks.get(model.model) ?? Infinity,
   }));
   const ranks = rankMapForSort(modelRows, sortKey, "estimated_capability", "model");
   const rows = sortRowsForKey(
@@ -466,7 +466,7 @@ function renderModelDetail() {
     els.modelBars.innerHTML = `<p class="muted">No model selected.</p>`;
     return;
   }
-  const timelineRank = timelineRankMap().get(model.model);
+  const timelineRank = model.rank ?? timelineRankMap().get(model.model);
   const bridgeScores = modelBridgeTagScores(model.model);
   els.modelDetailTitle.textContent = model.model;
   els.modelDetailScore.textContent = `rank ${fmt(timelineRank, 0)} · L2 ${fmt(model.capability_l2)}`;
