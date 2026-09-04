@@ -1,285 +1,337 @@
 <!doctype html>
-<html lang="zh-CN">
+<!-- Theme switch: change data-theme to "blue" or "warm". -->
+<html lang="en" data-theme="blue">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#eaf4ff" />
+    <meta name="theme-color" content="#f5f9ff" />
+    <meta
+      name="description"
+      content="Meta-Eval maps the empirical structure connecting AI models, benchmarks, and human-interpretable capabilities."
+    />
     <meta http-equiv="Cache-Control" content="no-store" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
-    <title>Meta Evaluation</title>
-    <link rel="stylesheet" href="./styles.css?v=20260713-freeze-finetune" />
+    <title>Meta-Evaluation of AI: Recovering Model Ability and Benchmark Demand Profiles at Scale</title>
+    <link rel="stylesheet" href="./styles.css?v=20260904-timeline-search" />
   </head>
-  <body class="hero-mode">
+  <body>
+    <a class="skip-link" href="#mainContent">Skip to main content</a>
+
     <nav class="site-topbar" aria-label="Primary navigation">
       <div class="site-topbar-inner">
-        <a class="fudan-brand" href="#" aria-label="Fudan University">
-          <img class="fudan-mark" src="./assets/fudan-logo.svg" alt="" />
-          <span class="fudan-name">Fudan University</span>
+        <a class="fudan-brand" href="#overview" aria-label="Institute of Trustworthy Embodied AI home">
+          <img class="fudan-mark" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEgAAABPCAIAAADHihSoAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAASKADAAQAAAABAAAATwAAAAAiEZr/AAADOklEQVR4Ae2aIWwVQRCGKSF5KOoaDA4SgiYYJIoEDBaNwVXhEDhUXQ0ai4EEhcQQNCEBhyF1RfHU4yeTTDZ7t3Mzd3M725dtmmZ2b3dmv/lnb+/d68Fut7u0jz+X9xHqP1MHu2jKdsW6Yo1koJdiI0Kol9EVU6eqkYFdsUaEUC+jK6ZOVSMDu2JjQnz9uX16cnb68c/YRbe+eVEO5n3QRLCT9+efvm15+S+fHD5/eI2bLsaSKHPAINGrd+ejS3fEK0V5cGdz//bVySTawIYpHOKB7d6tzd2bm+ElZU8JKZ0+mUEDmCYex54MzCNTQ5O4dPyHF0elDBrA4NHEhvF6PCsSCvL48WGJCqFtYJQtdzyTw0kkWuQcsBl4Jekg1KPXZ+RQ87fkZzh3Phh8mTKN8emy3GsvY1sERr5wRqcHWhZg2ATe5+9/9VOUtZcFcgCz6patQGjKSEiocKBdEfzGXkrrNlsJpxJg2SVutggmCKXfmW2BuSCRaCuC4bHgy49t6amSa4YNTe3x4EljRTDEpkfVyXuggGQ96Bh4XTBiAx5vdw5MhmPtZZ5XB6N4YMvw1kOiiJXAMjw0qUqpP/1b0jYdo7GrgtGCSkj6Wzn5EXYmBgSADfNtRRLKmJ3Hg5keNTVIxBYJZt1OwudlFoqNGDBr7cnbiWFSIwDMdOYKtQc/ICm9HQgAS/Mq2DISvdWEkhcMTKg95c5sTjEByVTDDYFpak8o3exSE2C+SEQYDybUnnI7ZVrFg0Got8dHo8uyHnRDJzGKrVF7GVsAGE6eklDW50Z8rZPxcDMAjGOnhnU7TT43xoNZt5Nws0kzFQlmRRJ2ZopEdhiYqfZMSG5g9FFf//4Qga8/+zXMcalHWXvZdB/FTGyowGwRpaZw0JWmcL/bP7CA7febG8guu15iAAn3vdKpoPHsoxhHAh5+TfuH55IxYztlHqjp8P3YqF+hE6VY+np23nYajeWs2GgMTaeXUBwrHswdidgiwVZCCgZz3E5cfqkRc/PACkpvl9LFLbEDwJYsVz/X7YDWh6wzsoPVybNflK6YXy7reOqK1cmzX5SumF8u63jqitXJs1+UrphfLut42lvF/gEQLdX9IIWExgAAAABJRU5ErkJggg==" alt="" />
+          <span>
+            <strong class="fudan-name">Institute of Trustworthy Embodied AI</strong>
+            <small>Fudan University</small>
+          </span>
         </a>
         <div class="site-nav-links">
-          <a href="#timelineView">Latest</a>
-          <a href="#modelsView">Research</a>
-          <a href="#tagsView">About</a>
-          <a href="#tagsView">Contact</a>
+          <a href="./scores.html">Score matrix</a>
+          <a href="#timelineView">Timeline</a>
+          <a href="#heatmapsView">Heatmap</a>
+          <a href="#profilesView">Profiles</a>
+          <a href="#tagsView">Tags</a>
+          <a href="#futureView">More</a>
         </div>
       </div>
     </nav>
-    <main class="shell">
-      <header class="masthead">
-        <div>
-          <h1>Meta Evaluation</h1>
-        </div>
-        <div class="run-meta" hidden>
-          <span id="runSource">Loading data...</span>
-          <select id="trainingRun" aria-label="训练设置"></select>
-          <span id="runConfigMeta"></span>
+
+    <main id="mainContent">
+      <header class="research-hero" id="overview">
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <h1>
+              <span class="title-accent">M</span>eta-<span class="title-accent">E</span>valuation of AI
+            </h1>
+            <p class="hero-lead">
+              Measurement constructs are discovered, not imposed. Because the latent dimensions are inferred from observed model–dataset interactions, they can reveal whether machine capabilities align with, diverge from, or cut across human-designed taxonomies.
+            </p>
+          </div>
+
         </div>
       </header>
 
-      <section class="stats-grid" aria-label="数据概览">
-        <div class="stat"><span>Models</span><strong id="modelCount">--</strong></div>
-        <div class="stat"><span>Benchmarks</span><strong id="benchmarkCount">--</strong></div>
-        <div class="stat"><span>Latent dims</span><strong id="dimensionCount">--</strong></div>
-        <div class="stat"><span>Tags</span><strong id="tagCount">--</strong></div>
-        <div class="stat"><span>Fit MSE</span><strong id="fitMse">--</strong></div>
-      </section>
-
-      <section class="view active" id="timelineView">
-        <div class="module-title">
-          <div>
-            <p class="eyebrow">Module 01</p>
-            <h2>能力时间线</h2>
-          </div>
-          <span>横轴是发布时间；model 与 benchmark 上下分面、共享时间轴，各自使用独立纵轴。</span>
+      <div class="shell">
+        <div class="run-meta" hidden>
+          <span id="runSource">Loading data…</span>
+          <select id="trainingRun" aria-label="Training run"></select>
+          <span id="runConfigMeta"></span>
         </div>
-        <section class="panel">
-          <div class="panel-head">
-            <h2>Model / benchmark linked timeline</h2>
-            <span id="timelineSummary">--</span>
-          </div>
-          <div class="toolbar compact-toolbar">
-            <label class="field compact">
-              <span>Timeline view</span>
-              <select id="timelineViewMode">
-                <option value="combined" selected>Model + benchmark linked</option>
-                <option value="models">Models only</option>
-                <option value="benchmarks">Benchmarks only</option>
-              </select>
-            </label>
-            <label class="field compact">
-              <span>Benchmark metric</span>
-              <select id="benchmarkTimelineMetric">
-                <option value="difficulty_b_scaled" selected>Difficulty × scale</option>
-                <option value="difficulty_b">Difficulty b</option>
-                <option value="difficulty_score">Predicted difficulty</option>
-                <option value="difficulty_weight">Difficulty weight</option>
-              </select>
-            </label>
-            <button id="resetTimelineZoom" class="tool-button" type="button" disabled title="Mouse wheel to zoom; drag after zooming to pan">Reset zoom</button>
-          </div>
-          <div class="timeline-frame">
-            <div class="timeline-chart">
-              <canvas id="timelineCanvas" width="1200" height="680"></canvas>
-              <div id="timelineHitLayer" class="timeline-hit-layer"></div>
-              <div id="timelineTooltip" class="timeline-tooltip" hidden></div>
+
+        <section class="view story-section" id="timelineView">
+          <div class="section-heading timeline-section-heading">
+            <span class="section-number" aria-hidden="true">01</span>
+            <div class="timeline-section-title">
+              <h2>AI Capability Over Time</h2>
             </div>
-            <div id="canvasFamilyLegend" class="canvas-family-legend" aria-label="Model family filter"></div>
           </div>
-        </section>
-      </section>
 
-      <section class="view active" id="fitView">
-        <div class="module-title">
-          <div>
-            <p class="eyebrow">Module 02</p>
-            <h2>原始拟合可视化</h2>
+          <figure class="editorial-figure timeline-figure">
+            <span id="timelineSummary" hidden></span>
+            <div class="toolbar compact-toolbar" aria-label="Timeline controls">
+              <label class="field compact">
+                <span>View</span>
+                <select id="timelineViewMode">
+                  <option value="combined">Models + benchmarks</option>
+                  <option value="models" selected>Models only</option>
+                  <option value="benchmarks">Benchmarks only</option>
+                </select>
+              </label>
+              <label class="field compact" id="benchmarkMetricField">
+                <span>Benchmark metric</span>
+                <select id="benchmarkTimelineMetric">
+                  <option value="difficulty_b_scaled" selected>Difficulty × scale</option>
+                  <option value="difficulty_b">Difficulty b</option>
+                  <option value="difficulty_score">Predicted difficulty</option>
+                  <option value="difficulty_weight">Difficulty weight</option>
+                </select>
+              </label>
+              <button id="resetTimelineZoom" class="tool-button" type="button" disabled title="Reset timeline zoom">Reset view</button>
+              <div class="timeline-search">
+                <button id="timelineSearchToggle" class="tool-button timeline-search-toggle" type="button" aria-expanded="false" aria-controls="timelineSearchPanel">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
+                  Search
+                </button>
+                <div id="timelineSearchPanel" class="timeline-search-panel" hidden>
+                  <label for="timelineSearchInput">Find a model or benchmark</label>
+                  <div class="timeline-search-input-row">
+                    <input id="timelineSearchInput" type="search" placeholder="GPT, Claude, Llama…" autocomplete="off" />
+                    <button id="timelineSearchClear" type="button" aria-label="Clear timeline search" title="Clear search">×</button>
+                  </div>
+                  <div id="timelineSearchStatus" class="timeline-search-status" role="status"></div>
+                  <div id="timelineSearchResults" class="timeline-search-results" aria-label="Search results"></div>
+                </div>
+              </div>
+            </div>
+            <div class="timeline-frame">
+              <div class="timeline-chart">
+                <canvas id="timelineCanvas" width="1200" height="680" aria-label="Capability timeline visualization"></canvas>
+                <div id="timelineHitLayer" class="timeline-hit-layer"></div>
+                <div id="timelineTooltip" class="timeline-tooltip" hidden></div>
+              </div>
+              <div id="canvasFamilyLegend" class="canvas-family-legend" aria-label="Filter by model family"></div>
+            </div>
+          </figure>
+        </section>
+
+        <section class="view story-section" id="heatmapsView">
+          <div class="section-heading">
+            <span class="section-number" aria-hidden="true">02</span>
+            <div>
+              <h2>The capability map.</h2>
+            </div>
           </div>
-          <span>展示预测拟合摘要；远端快照缺少 raw score rows 时会明确提示。</span>
-        </div>
-        <section class="panel fit-image-panel">
-          <div class="panel-head">
-            <h2>原始拟合可视化</h2>
-            <span id="fitImageSource">来自远端 outputs/model_fit 的 PDF 转图</span>
+
+          <div class="toolbar heatmap-toolbar" aria-label="Heatmap controls">
+            <label class="field compact">
+              <span>Matrix</span>
+              <select id="heatmapType">
+                <option value="modelTags" selected>Models × semantic constructs</option>
+                <option value="models">Models × latent dimensions</option>
+                <option value="benchmarks">Benchmarks × latent dimensions</option>
+              </select>
+            </label>
+            <label class="field compact">
+              <span>Sort by construct</span>
+              <select id="heatmapSortTag"><option value="">Overall / bridge score</option></select>
+            </label>
+            <label class="field compact small-field">
+              <span>Rows</span>
+              <input id="heatmapLimit" type="number" min="10" max="120" step="10" value="40" />
+            </label>
           </div>
-          <div class="fit-image-wrap">
-            <img id="fitImage" src="" alt="拟合可视化：predicted value 与 gold value 对比" />
+
+          <figure class="editorial-figure heatmap-panel">
+            <figcaption class="figure-heading">
+              <h3 id="heatmapTitle">Capability heatmap</h3>
+            </figcaption>
+            <div id="heatmap" class="heatmap"></div>
+          </figure>
+
+          <details class="bridge-disclosure">
+            <summary>
+              <span>Semantic bridge diagnostics</span>
+              <strong id="bridgeSummary">—</strong>
+            </summary>
+            <div class="semantic-layout">
+              <section class="bridge-panel">
+                <div id="bridgeReliability" class="bridge-reliability"></div>
+              </section>
+              <aside class="interpretation-panel">
+                <h3>Three limits to keep visible</h3>
+                <ul class="guardrail-list">
+                  <li><strong>Compare within columns.</strong><span>Do not directly subtract values across different constructs.</span></li>
+                  <li><strong>Read relative position.</strong><span>Projected values are not absolute 0–100 capability scores.</span></li>
+                  <li><strong>Weak evidence is not absence.</strong><span>Low correspondence may reflect sparse records or annotation.</span></li>
+                </ul>
+              </aside>
+            </div>
+          </details>
+        </section>
+
+        <section class="view story-section" id="profilesView">
+          <div class="section-heading">
+            <span class="section-number" aria-hidden="true">03</span>
+            <div>
+              <h2>Models and benchmarks.</h2>
+            </div>
+          </div>
+
+          <section class="profile-block" id="modelsView">
+            <div class="profile-intro">
+              <h3>Model capability distribution</h3>
+            </div>
+            <div class="toolbar explorer-toolbar">
+              <label class="field">
+                <span>Search models</span>
+                <input id="modelSearch" type="search" placeholder="DeepSeek, GPT, Claude…" />
+              </label>
+              <label class="field compact">
+                <span>Sort by</span>
+                <select id="modelSort"></select>
+              </label>
+              <label class="field compact small-field">
+                <span>Show</span>
+                <input id="modelLimit" type="number" min="5" max="303" step="5" value="40" />
+              </label>
+            </div>
+            <div class="split">
+              <section class="panel table-panel">
+                <div class="panel-head">
+                  <h3>Models</h3>
+                  <span id="modelResultCount" hidden>—</span>
+                </div>
+                <div class="table-wrap">
+                  <table>
+                    <thead><tr><th>Rank</th><th>Model</th><th>Latent L2</th></tr></thead>
+                    <tbody id="modelTable"></tbody>
+                  </table>
+                </div>
+              </section>
+              <section class="panel detail-panel">
+                <div class="panel-head">
+                  <h3 id="modelDetailTitle">Select a model</h3>
+                  <span id="modelDetailScore" hidden>—</span>
+                </div>
+                <div id="modelBars" class="bar-list"></div>
+              </section>
+            </div>
+          </section>
+
+          <section class="profile-block" id="benchmarksView">
+            <div class="profile-intro">
+              <h3>Benchmark capability demand</h3>
+            </div>
+            <div class="toolbar explorer-toolbar">
+              <label class="field">
+                <span>Search benchmarks</span>
+                <input id="benchmarkSearch" type="search" placeholder="AIME, MMLU, Aider…" />
+              </label>
+              <label class="field compact">
+                <span>Sort by</span>
+                <select id="benchmarkSort"></select>
+              </label>
+              <label class="field compact">
+                <span>Construct filter</span>
+                <select id="tagFilter"></select>
+              </label>
+            </div>
+            <div class="split">
+              <section class="panel table-panel">
+                <div class="panel-head">
+                  <h3>Benchmarks</h3>
+                  <span id="benchmarkResultCount" hidden>—</span>
+                </div>
+                <div class="table-wrap">
+                  <table>
+                    <thead><tr><th>Rank</th><th>Benchmark</th><th>Selected metric</th><th>Pred. difficulty</th><th>Top construct</th></tr></thead>
+                    <tbody id="benchmarkTable"></tbody>
+                  </table>
+                </div>
+              </section>
+              <section class="panel detail-panel">
+                <div class="panel-head">
+                  <h3 id="benchmarkDetailTitle">Select a benchmark</h3>
+                  <span id="benchmarkDetailScore" hidden>—</span>
+                </div>
+                <div id="benchmarkTags" class="tag-row"></div>
+                <h4>Human annotation scores</h4>
+                <div id="benchmarkBars" class="bar-list"></div>
+                <div id="weightBars" hidden></div>
+              </section>
+            </div>
+          </section>
+        </section>
+
+        <section class="view story-section" id="tagsView">
+          <div class="section-heading">
+            <span class="section-number" aria-hidden="true">04</span>
+            <div>
+              <h2>The construct dictionary.</h2>
+            </div>
+          </div>
+          <section class="rubric-panel">
+            <div id="tagCards" class="tag-grid"></div>
+          </section>
+        </section>
+
+        <section class="view story-section future-view" id="futureView">
+          <div class="section-heading">
+            <span class="section-number" aria-hidden="true">05</span>
+            <div>
+              <h2>More evidence, as it arrives.</h2>
+            </div>
+          </div>
+
+          <!-- Add future figures as <figure class="future-figure"> items inside #futureGallery. -->
+          <div class="future-gallery" id="futureGallery">
+            <article class="future-slot future-slot-wide">
+              <strong>Additional validation</strong>
+            </article>
+            <article class="future-slot">
+              <strong>Ablations &amp; robustness</strong>
+            </article>
+            <article class="future-slot">
+              <strong>New capability views</strong>
+            </article>
           </div>
         </section>
-        <section class="panel">
-          <div class="panel-head">
-            <h2>预测拟合摘要</h2>
-            <span id="fitSummary">--</span>
-          </div>
+
+        <section class="technical-state" aria-hidden="true" hidden>
+          <span id="modelCount">—</span>
+          <span id="benchmarkCount">—</span>
+          <span id="dimensionCount">—</span>
+          <span id="tagCount">—</span>
+          <span id="observedRate">—</span>
+          <span id="coverageCells">—</span>
+          <span id="observedCoverage">—</span>
+          <span id="imputedCoverage">—</span>
+          <span id="observedCoverageBar"></span>
+          <span id="activeRunLabel">—</span>
+          <span id="activeRunSource">—</span>
+          <span id="fitAvailability">—</span>
+          <span id="fitSummary"></span>
           <canvas id="fitCanvas" width="900" height="420"></canvas>
+          <table><tbody id="fitTable"></tbody></table>
+          <img id="fitImage" src="" alt="" />
+          <span id="fitImageSource"></span>
         </section>
-        <section class="panel">
-          <div class="panel-head">
-            <h2>最大误差样本</h2>
-            <span>按 |predicted - actual| 排序</span>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr><th>Benchmark</th><th>Model</th><th>Actual</th><th>Pred</th><th>Error</th></tr>
-              </thead>
-              <tbody id="fitTable"></tbody>
-            </table>
-          </div>
-        </section>
-      </section>
-
-      <section class="view active" id="heatmapsView">
-        <div class="module-title">
-          <div>
-            <p class="eyebrow">Module 03</p>
-            <h2>热力图</h2>
-          </div>
-          <span>模型、benchmark 与语义 tag 的矩阵视图。</span>
-        </div>
-        <div class="toolbar">
-          <label class="field compact">
-            <span>矩阵</span>
-            <select id="heatmapType">
-              <option value="modelTags" selected>Models × semantic tags</option>
-              <option value="models">Models capability</option>
-              <option value="benchmarks">Benchmarks difficulty</option>
-            </select>
-          </label>
-          <label class="field compact">
-            <span>排序 tag</span>
-            <select id="heatmapSortTag">
-              <option value="">Overall / bridge score</option>
-            </select>
-          </label>
-          <label class="field compact">
-            <span>行数</span>
-            <input id="heatmapLimit" type="number" min="10" max="120" step="10" value="60" />
-          </label>
-        </div>
-        <section class="panel">
-          <div class="panel-head">
-            <h2 id="heatmapTitle">Capability heatmap</h2>
-            <span>红高蓝低，可按综合分或单个 tag 分数排序</span>
-          </div>
-          <div id="heatmap" class="heatmap"></div>
-        </section>
-      </section>
-
-      <section class="view active" id="modelsView">
-        <div class="module-title">
-          <div>
-            <p class="eyebrow">Module 04</p>
-            <h2>模型能力值</h2>
-          </div>
-          <span>展示当前训练 run 的 difficulty-weighted imputed 综合排名；真实观测优先，缺失值由同一 run 的 MIRT 预测补齐。</span>
-        </div>
-        <div class="toolbar">
-          <label class="field">
-            <span>搜索模型</span>
-            <input id="modelSearch" type="search" placeholder="DeepSeek, GPT, Claude..." />
-          </label>
-          <label class="field compact">
-            <span>排序</span>
-            <select id="modelSort"></select>
-          </label>
-          <label class="field compact">
-            <span>显示数量</span>
-            <input id="modelLimit" type="number" min="5" max="208" step="5" value="40" />
-          </label>
-        </div>
-        <div class="split">
-          <section class="panel table-panel">
-            <div class="panel-head">
-              <h2>模型能力榜</h2>
-              <span id="modelResultCount">--</span>
-            </div>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr><th>Rank</th><th>Model</th><th>L2</th></tr>
-                </thead>
-                <tbody id="modelTable"></tbody>
-              </table>
-            </div>
-          </section>
-          <section class="panel detail-panel">
-            <div class="panel-head">
-              <h2 id="modelDetailTitle">选择一个模型</h2>
-              <span id="modelDetailScore">--</span>
-            </div>
-            <div id="modelBars" class="bar-list"></div>
-          </section>
-        </div>
-      </section>
-
-      <section class="view active" id="benchmarksView">
-        <div class="module-title">
-          <div>
-            <p class="eyebrow">Module 05</p>
-            <h2>Benchmark 难度</h2>
-          </div>
-          <span>默认使用公式难度的 b × scale；可切换原始 b、预测难度和 ranking weight 做诊断。</span>
-        </div>
-        <div class="toolbar">
-          <label class="field">
-            <span>搜索 Benchmark</span>
-            <input id="benchmarkSearch" type="search" placeholder="AIME, MMLU, Aider..." />
-          </label>
-          <label class="field compact">
-            <span>排序</span>
-            <select id="benchmarkSort"></select>
-          </label>
-          <label class="field compact">
-            <span>Tag</span>
-            <select id="tagFilter"></select>
-          </label>
-        </div>
-        <div class="split">
-          <section class="panel table-panel">
-            <div class="panel-head">
-              <h2>Benchmark 难度榜</h2>
-              <span id="benchmarkResultCount">--</span>
-            </div>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr><th>Rank</th><th>Benchmark</th><th>Selected metric</th><th>Pred diff</th><th>Top tag</th></tr>
-                </thead>
-                <tbody id="benchmarkTable"></tbody>
-              </table>
-            </div>
-          </section>
-          <section class="panel detail-panel">
-            <div class="panel-head">
-              <h2 id="benchmarkDetailTitle">选择一个 benchmark</h2>
-              <span id="benchmarkDetailScore">--</span>
-            </div>
-            <div id="benchmarkTags" class="tag-row"></div>
-            <h3>Tag scores</h3>
-            <div id="benchmarkBars" class="bar-list"></div>
-          </section>
-        </div>
-      </section>
-
-      <section class="view active" id="tagsView">
-        <div class="module-title">
-          <div>
-            <p class="eyebrow">Module 06</p>
-            <h2>标签解释</h2>
-          </div>
-          <span>原版中文 rubric 解释，并叠加筛选后的标签分布。</span>
-        </div>
-        <section class="panel">
-          <div class="panel-head">
-            <h2>筛选后标签分布</h2>
-            <span>解释来自原版 rubrics.json，分布来自 tag_activity_stats.csv</span>
-          </div>
-          <div id="tagCards" class="tag-grid"></div>
-        </section>
-      </section>
+      </div>
     </main>
 
-    <script src="./app.js?v=20260713-freeze-finetune"></script>
+    <footer class="site-footer">
+      <div>
+        <strong>Meta-Eval</strong>
+        <span>AI evaluation as an empirical measurement system.</span>
+      </div>
+      <div class="footer-links">
+        <span>Fudan University · Research dashboard</span>
+        <a href="#overview">Back to top ↑</a>
+      </div>
+    </footer>
+
+    <script src="./app.js?v=20260904-timeline-search"></script>
   </body>
 </html>

@@ -4,9 +4,10 @@ const state = {
   selectedBenchmark: null,
   selectedRunTag: null,
   selectedFamily: "All",
-  timelineViewMode: "combined",
+  timelineViewMode: "models",
   benchmarkTimelineMetric: "difficulty_b_scaled",
   timelinePoints: [],
+  timelineSearchSelection: null,
   timelinePreviousFamily: "All",
   timelineAnimation: null,
   timelineIntroPlayed: false,
@@ -18,14 +19,15 @@ const state = {
   dashboardRendered: false,
 };
 
-const FIXED_RUN_TAG = "extend4689_buck_meansafe_bce_corrloss_wogamma_vd=20_R=0.1_btlw=12_fold_idx3";
-const FIT_IMAGE_FALLBACK_RUN_TAG = FIXED_RUN_TAG;
+const FIT_IMAGE_FALLBACK_RUN_TAG = "extend4689_buck_meansafe_bce_corrloss_wogamma_vd=20_R=0.1_btlw=12_fold_idx3";
 const TIMELINE_START_DATE = "2023-01-01";
 const TIMELINE_START_MS = new Date(`${TIMELINE_START_DATE}T00:00:00`).getTime();
 const TIMELINE_RIGHT_PADDING_MS = 70 * 24 * 60 * 60 * 1000;
-const TIMELINE_CAPABILITY_LABEL = "Difficulty-weighted imputed score";
-const TIMELINE_DISPLAY_LABEL = "Model score";
-const TIMELINE_PERCENTILE_LABEL = "Capability percentile";
+const TIMELINE_CAPABILITY_LABEL = "Imputed benchmark rank points";
+const TIMELINE_DISPLAY_LABEL = "Imputed benchmark rank points";
+const TIMELINE_AXIS_LABEL = "Capability rank points";
+const TIMELINE_PERCENTILE_LABEL = "Points percentile";
+const TIMELINE_SCORE_DIGITS = 1;
 const BENCHMARK_DIFFICULTY_METRICS = {
   difficulty_b_scaled: { label: "Difficulty × scale", shortLabel: "b × scale" },
   difficulty_b: { label: "Difficulty b", shortLabel: "b" },
@@ -50,7 +52,16 @@ const els = {
   benchmarkCount: $("#benchmarkCount"),
   dimensionCount: $("#dimensionCount"),
   tagCount: $("#tagCount"),
-  fitMse: $("#fitMse"),
+  observedRate: $("#observedRate"),
+  coverageCells: $("#coverageCells"),
+  observedCoverage: $("#observedCoverage"),
+  imputedCoverage: $("#imputedCoverage"),
+  observedCoverageBar: $("#observedCoverageBar"),
+  activeRunLabel: $("#activeRunLabel"),
+  activeRunSource: $("#activeRunSource"),
+  fitAvailability: $("#fitAvailability"),
+  bridgeReliability: $("#bridgeReliability"),
+  bridgeSummary: $("#bridgeSummary"),
   modelSearch: $("#modelSearch"),
   modelSort: $("#modelSort"),
   modelLimit: $("#modelLimit"),
@@ -78,6 +89,13 @@ const els = {
   canvasFamilyLegend: $("#canvasFamilyLegend"),
   timelineSummary: $("#timelineSummary"),
   timelineViewMode: $("#timelineViewMode"),
+  timelineSearchToggle: $("#timelineSearchToggle"),
+  timelineSearchPanel: $("#timelineSearchPanel"),
+  timelineSearchInput: $("#timelineSearchInput"),
+  timelineSearchClear: $("#timelineSearchClear"),
+  timelineSearchStatus: $("#timelineSearchStatus"),
+  timelineSearchResults: $("#timelineSearchResults"),
+  benchmarkMetricField: $("#benchmarkMetricField"),
   benchmarkTimelineMetric: $("#benchmarkTimelineMetric"),
   resetTimelineZoom: $("#resetTimelineZoom"),
   timelineCanvas: $("#timelineCanvas"),
@@ -95,6 +113,68 @@ function fmt(value, digits = 3) {
   return Number.isFinite(number) ? number.toFixed(digits) : "--";
 }
 
+function themeColor(token, fallback) {
+  const value = getComputedStyle(document.documentElement).getPropertyValue(token).trim();
+  return value || fallback;
+}
+
+function syncDocumentThemeColor() {
+  const themeMeta = document.querySelector('meta[name="theme-color"]');
+  if (themeMeta) themeMeta.setAttribute("content", themeColor("--bg", "#f5f9ff"));
+}
+
+function compactAxisNumber(value, digits = 1) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return "--";
+  const absolute = Math.abs(number);
+  const units = [
+    { threshold: 1e9, divisor: 1e9, suffix: "B" },
+    { threshold: 1e6, divisor: 1e6, suffix: "M" },
+    { threshold: 1e3, divisor: 1e3, suffix: "k" },
+  ];
+  const unit = units.find((item) => absolute >= item.threshold);
+  if (!unit) return fmt(number, digits);
+  const scaled = number / unit.divisor;
+  const precision = Math.abs(scaled) >= 100 ? 0 : Math.abs(scaled) >= 10 ? 1 : 2;
+  return `${scaled.toFixed(precision).replace(/\.0+$|(?<=\.[0-9])0+$/, "")}${unit.suffix}`;
+}
+
+function timelineDateTicks(minX, maxX) {
+  const dayMs = 24 * 60 * 60 * 1000;
+  const spanDays = (maxX - minX) / dayMs;
+  const stepMonths = spanDays <= 240 ? 1 : spanDays <= 620 ? 3 : spanDays <= 1180 ? 6 : 12;
+  const start = new Date(minX);
+  let year = start.getUTCFullYear();
+  let month = start.getUTCMonth();
+
+  if (stepMonths === 12) {
+    if (month > 0) year += 1;
+    month = 0;
+  } else {
+    month = Math.ceil(month / stepMonths) * stepMonths;
+    if (month >= 12) {
+      year += 1;
+      month -= 12;
+    }
+  }
+
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const ticks = [];
+  let cursor = new Date(Date.UTC(year, month, 1));
+  while (cursor.getTime() <= maxX) {
+    const tickYear = cursor.getUTCFullYear();
+    const tickMonth = cursor.getUTCMonth();
+    const label = stepMonths === 12
+      ? String(tickYear)
+      : stepMonths === 3
+      ? `Q${Math.floor(tickMonth / 3) + 1} ’${String(tickYear).slice(-2)}`
+      : `${monthNames[tickMonth]} ’${String(tickYear).slice(-2)}`;
+    ticks.push({ value: cursor.getTime(), label });
+    cursor = new Date(Date.UTC(tickYear, tickMonth + stepMonths, 1));
+  }
+  return ticks;
+}
+
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
 }
@@ -105,11 +185,6 @@ function escapeHtml(value) {
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;");
-}
-
-function valueColor(value, maxAbs) {
-  const t = maxAbs ? Math.pow(clamp(Math.abs(value) / maxAbs, 0, 1), 0.42) : 0;
-  return signedHeatColor(value, t);
 }
 
 function heatCellTextColor(background) {
@@ -137,18 +212,18 @@ function interpolateColorStops(stops, t) {
 
 function signedHeatColor(value, t) {
   const positiveStops = [
-    [255, 255, 255],
-    [255, 238, 168],
-    [244, 179, 70],
-    [224, 91, 71],
-    [166, 38, 103],
+    [248, 245, 238],
+    [238, 222, 190],
+    [217, 157, 91],
+    [193, 95, 60],
+    [119, 56, 39],
   ];
   const negativeStops = [
-    [255, 255, 255],
-    [195, 234, 230],
-    [67, 174, 190],
-    [67, 91, 173],
-    [84, 38, 139],
+    [248, 245, 238],
+    [216, 229, 223],
+    [130, 170, 163],
+    [74, 116, 128],
+    [32, 63, 74],
   ];
   return interpolateColorStops(value >= 0 ? positiveStops : negativeStops, t);
 }
@@ -169,34 +244,34 @@ function buildColumnStats(rows, vectorKey, columnCount) {
     const values = rows
       .map((row) => Number(row[vectorKey][index]))
       .filter(Number.isFinite);
-    const low = quantile(values, 0.05);
-    const high = quantile(values, 0.95);
+    const low = quantile(values, 0.08);
+    const high = quantile(values, 0.92);
     const mid = quantile(values, 0.5);
     return { low, mid, high };
   });
 }
 
-function tagValueColor(value, stats) {
-  if (!stats || stats.high === stats.low) return "rgb(255, 255, 255)";
+function columnRelativeHeatColor(value, stats) {
+  if (!Number.isFinite(Number(value)) || !stats || stats.high === stats.low) return "rgb(248, 245, 238)";
   if (value >= stats.mid) {
     const t = clamp((value - stats.mid) / Math.max(stats.high - stats.mid, 0.0001), 0, 1);
-    return signedHeatColor(value, Math.pow(t, 0.44));
+    return signedHeatColor(1, Math.pow(t, 0.62));
   }
   const t = clamp((stats.mid - value) / Math.max(stats.mid - stats.low, 0.0001), 0, 1);
-  return signedHeatColor(value, Math.pow(t, 0.44));
+  return signedHeatColor(-1, Math.pow(t, 0.62));
 }
 
 const FAMILY_COLORS = {
-  GPT: "#2f80c0",
-  Claude: "#e58a2a",
-  Gemini: "#3fa45b",
-  DeepSeek: "#d84545",
-  Qwen: "#cdb9e8",
-  GLM: "#8e5a43",
-  Llama: "#d86db0",
-  Kimi: "#22aeb3",
-  Benchmark: "#9fb8c9",
-  Others: "#b8b8b8",
+  GPT: "#476f79",
+  Claude: "#c15f3c",
+  Gemini: "#64806a",
+  DeepSeek: "#a64d3e",
+  Qwen: "#8f7b9e",
+  GLM: "#8b6e52",
+  Llama: "#b96f84",
+  Kimi: "#4f8a87",
+  Benchmark: "#8f8678",
+  Others: "#aaa49a",
 };
 
 function trainingRuns() {
@@ -275,6 +350,13 @@ function populateControls() {
 function hydrateStats() {
   const run = activeRun();
   const meta = run.metadata;
+  const pageMeta = state.data.metadata || meta;
+  const ranking = state.data.ranking_metadata || state.data.timeline_metadata || {};
+  const completeCells = Number(ranking.complete_cell_count) || 0;
+  const observedCells = Number(ranking.observed_cell_count) || 0;
+  const imputedCells = Number(ranking.imputed_cell_count) || 0;
+  const observedRate = completeCells ? (observedCells / completeCells) * 100 : 0;
+  const imputedRate = completeCells ? (imputedCells / completeCells) * 100 : 0;
   const runConfig = meta.loss
     ? `${meta.method} · ${meta.loss}${Number.isFinite(Number(meta.seed)) ? ` · seed ${meta.seed}` : ""}`
     : `${meta.method} · R=${meta.r}`;
@@ -284,9 +366,65 @@ function hydrateStats() {
   els.benchmarkCount.textContent = meta.benchmark_count;
   els.dimensionCount.textContent = meta.dimension_count;
   els.tagCount.textContent = meta.tag_count ?? state.data.tags.length;
-  els.fitMse.textContent =
-    state.data.fit?.available && meta.run_tag === state.data.metadata.run_tag ? fmt(state.data.fit.mse, 4) : "--";
+  els.observedRate.textContent = completeCells ? `${fmt(observedRate, 1)}%` : "--";
+  els.coverageCells.textContent = completeCells
+    ? `${observedCells.toLocaleString()} observed / ${completeCells.toLocaleString()} cells`
+    : "Coverage unavailable";
+  els.observedCoverage.textContent = completeCells
+    ? `${observedCells.toLocaleString()} · ${fmt(observedRate, 1)}%`
+    : "--";
+  els.imputedCoverage.textContent = completeCells
+    ? `${imputedCells.toLocaleString()} · ${fmt(imputedRate, 1)}%`
+    : "--";
+  els.observedCoverageBar.style.width = `${clamp(observedRate, 0, 100)}%`;
+  els.activeRunLabel.textContent = `${meta.dimension_count} latent dimensions · validation MSE ${fmt(meta.validation_mse, 4)}`;
+  els.activeRunSource.textContent = `${pageMeta.source_label || meta.source_label || "Current dashboard data"}. ${pageMeta.selection_reason || meta.selection_reason || ""}`.trim();
+  els.fitAvailability.textContent = state.data.fit?.available
+    ? `Raw fit diagnostics available · MSE ${fmt(state.data.fit.mse, 4)}`
+    : state.data.fit?.reason || "Raw fit diagnostics are not included in this freeze.";
   els.modelLimit.max = meta.model_count;
+}
+
+function renderBridgeReliability() {
+  const rows = (state.data.tag_bridge?.fit || [])
+    .map((row) => ({ ...row, spearman: Number(row.spearman_CV) }))
+    .filter((row) => Number.isFinite(row.spearman))
+    .sort((a, b) => b.spearman - a.spearman);
+
+  if (!rows.length) {
+    els.bridgeReliability.innerHTML = `<p class="muted">Bridge reliability data unavailable.</p>`;
+    els.bridgeSummary.textContent = "No held-out diagnostics";
+    return;
+  }
+
+  const maxAbs = Math.max(...rows.map((row) => Math.abs(row.spearman)), 0.01);
+  const positiveRows = rows.filter((row) => row.spearman > 0);
+  const median = positiveRows.length
+    ? quantile(positiveRows.map((row) => row.spearman), 0.5)
+    : 0;
+  const overlap = Number(state.data.tag_bridge?.benchmark_overlap);
+  els.bridgeSummary.textContent = `${rows.length} constructs · median ρ ${fmt(median, 2)}${Number.isFinite(overlap) ? ` · ${overlap} annotated benchmarks` : ""}`;
+  els.bridgeReliability.innerHTML = rows
+    .map((row, index) => {
+      const width = Math.max(2, (Math.abs(row.spearman) / maxAbs) * 100);
+      return `
+        <button class="bridge-row" type="button" data-bridge-tag="${escapeHtml(row.tag)}" title="Sort the model heatmap by ${escapeHtml(row.tag)}">
+          <span class="bridge-rank">${String(index + 1).padStart(2, "0")}</span>
+          <span class="bridge-name">${escapeHtml(row.tag)}</span>
+          <span class="bridge-track"><i class="${row.spearman >= 0 ? "positive" : "negative"}" style="width:${width}%"></i></span>
+          <strong>${fmt(row.spearman, 2)}</strong>
+        </button>`;
+    })
+    .join("");
+
+  els.bridgeReliability.querySelectorAll("[data-bridge-tag]").forEach((button) => {
+    button.addEventListener("click", () => {
+      els.heatmapType.value = "modelTags";
+      els.heatmapSortTag.value = button.dataset.bridgeTag;
+      renderHeatmap();
+      document.querySelector(".heatmap-toolbar")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  });
 }
 
 function getSortValue(item, sortKey, vectorKey) {
@@ -461,7 +599,7 @@ function renderWeightBars(container, weights) {
 function renderModelDetail() {
   const model = state.selectedModel;
   if (!model) {
-    els.modelDetailTitle.textContent = "选择一个模型";
+    els.modelDetailTitle.textContent = "Select a model";
     els.modelDetailScore.textContent = "--";
     els.modelBars.innerHTML = `<p class="muted">No model selected.</p>`;
     return;
@@ -522,7 +660,7 @@ function renderBenchmarks() {
 function renderBenchmarkDetail() {
   const bench = state.selectedBenchmark;
   if (!bench) {
-    els.benchmarkDetailTitle.textContent = "选择一个 benchmark";
+    els.benchmarkDetailTitle.textContent = "Select a benchmark";
     els.benchmarkDetailScore.textContent = "--";
     els.benchmarkTags.innerHTML = "";
     els.benchmarkBars.innerHTML = `<p class="muted">No benchmark selected.</p>`;
@@ -575,9 +713,7 @@ function renderHeatmap() {
       .slice(0, limit);
     vectorKey = "tag_values";
     labelKey = "model";
-    title = tagBridge?.models?.length
-      ? `Model × semantic tag bridge heatmap${tagBridge.source_run_tag ? ` (${tagBridge.source_run_tag.split("_vd=")[0]})` : ""}`
-      : "Model × semantic tag heatmap";
+    title = "Models × semantic constructs";
     yAxisLabel = "Model";
   } else {
     const isModel = type === "models";
@@ -590,12 +726,10 @@ function renderHeatmap() {
       .slice(0, limit);
     vectorKey = isModel ? "estimated_capability" : "estimated_difficulty";
     labelKey = isModel ? "model" : "benchmark_name";
-    title = isModel ? "Model capability heatmap" : "Benchmark difficulty heatmap";
+    title = isModel ? "Models × latent dimensions" : "Benchmarks × latent dimensions";
     yAxisLabel = isModel ? "Model" : "Benchmark";
   }
-  const absValues = rows.flatMap((row) => row[vectorKey].map((value) => Math.abs(value))).filter(Number.isFinite);
-  const maxAbs = Math.max(quantile(absValues, tagBridge?.models?.length ? 0.94 : 0.9), 0.0001);
-  const columnStats = type === "modelTags" ? buildColumnStats(rows, vectorKey, columns.length) : [];
+  const columnStats = buildColumnStats(rows, vectorKey, columns.length);
 
   els.heatmapTitle.textContent = title;
   els.heatmapSortTag.disabled = type !== "modelTags";
@@ -622,9 +756,7 @@ function renderHeatmap() {
         <div class="heat-label" title="${escapeHtml(row[labelKey])}">${escapeHtml(row[labelKey])}</div>
         ${row[vectorKey]
           .map((value, index) => {
-            const background = type === "modelTags"
-              ? (tagBridge?.models?.length ? valueColor(value, maxAbs) : tagValueColor(value, columnStats[index]))
-              : valueColor(value, maxAbs);
+            const background = columnRelativeHeatColor(value, columnStats[index]);
             const fit = tagFitByName.get(columns[index]);
             const cvText = fit ? ` · CV ${fmt(fit.spearman_CV, 3)}` : "";
             const textColor = heatCellTextColor(background);
@@ -666,22 +798,22 @@ function renderTags() {
         <article class="tag-card ${hasActivity ? "" : "tag-card-muted"}">
           <div class="tag-card-head">
             <h3>${escapeHtml(tag.zh || tag.tag)}</h3>
-            <span>${escapeHtml(tag.head_description || tag.head || "标签")}</span>
+            <span>${escapeHtml(tag.head_description || tag.head || "Construct")}</span>
           </div>
-          <strong>原始标签：${escapeHtml(tag.tag)}</strong>
+          <strong>Source tag: ${escapeHtml(tag.tag)}</strong>
           <p>${escapeHtml(tag.definition || "No rubric definition available.")}</p>
           ${hasActivity ? `
             <div class="tag-meter" aria-label="active benchmark ratio">
               <span style="width:${clamp((tag.active_ratio || 0) * 100, 0, 100)}%"></span>
             </div>
             <dl class="tag-stats">
-              <div><dt>活跃覆盖</dt><dd>${tag.n_active_benchmarks}/${tag.n_total_benchmarks}</dd></div>
-              <div><dt>筛选均值</dt><dd>${fmt(tag.score_mean, 2)}</dd></div>
-              <div><dt>全量均值</dt><dd>${fmt(tag.score_mean_all, 2)}</dd></div>
-              <div><dt title="outstandingC 活跃阈值：score > tau 即视为该 benchmark 激活此 tag">Tau 阈值</dt><dd>${fmt(tag.tau, 2)}</dd></div>
+              <div><dt>Active coverage</dt><dd>${tag.n_active_benchmarks}/${tag.n_total_benchmarks}</dd></div>
+              <div><dt>Filtered mean</dt><dd>${fmt(tag.score_mean, 2)}</dd></div>
+              <div><dt>Overall mean</dt><dd>${fmt(tag.score_mean_all, 2)}</dd></div>
+              <div><dt title="A benchmark activates this construct when score > tau">Tau threshold</dt><dd>${fmt(tag.tau, 2)}</dd></div>
             </dl>
             <details class="tag-active-list">
-              <summary>查看激活 benchmark（${tag.active_benchmarks?.length || 0}）</summary>
+              <summary>Active benchmarks (${tag.active_benchmarks?.length || 0})</summary>
               <ul>
                 ${(tag.active_benchmarks || [])
                   .map((bench) => `
@@ -692,10 +824,10 @@ function renderTags() {
                   .join("")}
               </ul>
             </details>
-          ` : `<p class="tag-note">新版 rubric 中存在该标签；当前聚合 tag score 暂无 activity 统计。</p>`}
+          ` : `<p class="tag-note">This construct exists in the current rubric; activity statistics are not available in this snapshot.</p>`}
           ${anchors.length ? `
             <details class="tag-active-list">
-              <summary>查看 0-5 分锚点</summary>
+              <summary>View 0–5 scoring anchors</summary>
               <ul class="tag-anchor-list">
                 ${anchors.map(([score, text]) => `
                   <li>
@@ -708,7 +840,7 @@ function renderTags() {
           ` : ""}
           ${(rubricTag.boundary_notes || []).length ? `
             <details class="tag-active-list">
-              <summary>边界说明</summary>
+              <summary>Boundary notes</summary>
               <ul class="tag-note-list">
                 ${rubricTag.boundary_notes.map((note) => `<li>${escapeHtml(note)}</li>`).join("")}
               </ul>
@@ -766,7 +898,7 @@ function timelineData() {
         model: point.model,
         family: point.family,
         release_date: point.release_date,
-        capability_sum: point.capability_sum ?? point.difficulty_weighted_imputed_score,
+        capability_sum: point.capability_sum ?? point.rank_points_total ?? point.difficulty_weighted_imputed_score,
         rank: point.rank,
       }));
   }
@@ -838,7 +970,82 @@ function benchmarkTimelineMetricLabel() {
 }
 
 function timelineViewMode() {
-  return TIMELINE_VIEW_MODES[state.timelineViewMode] ? state.timelineViewMode : "combined";
+  return TIMELINE_VIEW_MODES[state.timelineViewMode] ? state.timelineViewMode : "models";
+}
+
+function timelineSearchKey(point) {
+  return `${point.pointType}:${point.model}`;
+}
+
+function timelineSearchMatches() {
+  const normalize = (value) => String(value).toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
+  const query = normalize(els.timelineSearchInput.value);
+  if (!query) return [];
+  const mode = timelineViewMode();
+  return [
+    ...(mode === "benchmarks" ? [] : timelineData()),
+    ...(mode === "models" ? [] : benchmarkTimelineData()),
+  ].filter((point) => {
+    const date = new Date(`${point.release_date}T00:00:00`).getTime();
+    const score = point.pointType === "benchmark" ? point[benchmarkTimelineMetric()] : point.capability_sum;
+    return date >= TIMELINE_START_MS && Number.isFinite(score) && normalize(point.model).includes(query);
+  }).sort((a, b) => {
+    const aName = normalize(a.model);
+    const bName = normalize(b.model);
+    return Number(bName === query) - Number(aName === query)
+      || Number(bName.startsWith(query)) - Number(aName.startsWith(query))
+      || a.model.localeCompare(b.model);
+  });
+}
+
+function renderTimelineSearchResults() {
+  const matches = timelineSearchMatches();
+  els.timelineSearchInput.placeholder = timelineViewMode() === "benchmarks" ? "AIME, GPQA, MMLU…" : "GPT, Claude, Llama…";
+  const hasQuery = els.timelineSearchInput.value.trim();
+  els.timelineSearchStatus.textContent = !hasQuery
+    ? "Search names in the current view."
+    : matches.length ? `${matches.length} results · select to locate` : "No matching points in this view.";
+  els.timelineSearchResults.replaceChildren();
+  matches.forEach((point) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "timeline-search-result";
+    const name = document.createElement("span");
+    name.textContent = point.model;
+    const detail = document.createElement("small");
+    detail.textContent = `${point.pointType === "benchmark" ? "Benchmark" : point.family} · ${point.release_date}`;
+    button.append(name, detail);
+    button.addEventListener("click", () => locateTimelineSearchPoint(point));
+    els.timelineSearchResults.append(button);
+  });
+}
+
+function setTimelineSearchOpen(open) {
+  els.timelineSearchPanel.hidden = !open;
+  els.timelineSearchToggle.setAttribute("aria-expanded", String(open));
+  if (open) {
+    renderTimelineSearchResults();
+    els.timelineSearchInput.focus();
+  }
+}
+
+function locateTimelineSearchPoint(point) {
+  if (state.timelineAnimation) cancelAnimationFrame(state.timelineAnimation);
+  state.timelineAnimation = null;
+  state.timelineIntroPlayed = true;
+  state.timelineSearchSelection = timelineSearchKey(point);
+  // Search all families, including points outside the current pan/zoom.
+  state.selectedFamily = "All";
+  if (!state.timelinePoints.some((item) => timelineSearchKey(item) === state.timelineSearchSelection)) {
+    state.timelineZoom = null;
+  }
+  hideTimelineTooltip();
+  renderTimeline();
+  renderCanvasFamilyLegend();
+  setTimelineSearchOpen(false);
+  els.timelineSearchToggle.focus();
+  const selected = state.timelinePoints.find((item) => timelineSearchKey(item) === state.timelineSearchSelection);
+  if (selected) showTimelineTooltip(selected, selected.canvasX, selected.canvasY);
 }
 
 function metricColor(value, min, max) {
@@ -865,17 +1072,13 @@ function familyCounts() {
 
 function renderCanvasFamilyLegend() {
   const families = timelineFamilies();
-  const counts = familyCounts();
   els.canvasFamilyLegend.innerHTML = families
     .map((family) => {
-      const count = family === "All"
-        ? Object.values(counts).reduce((sum, value) => sum + value, 0)
-        : counts[family];
       const color = family === "All" ? "#14233a" : FAMILY_COLORS[family] || FAMILY_COLORS.Others;
       return `
         <button class="legend-button ${state.selectedFamily === family ? "active" : ""}" type="button" data-family="${escapeHtml(family)}">
           <span class="legend-dot" style="background:${color}"></span>
-          ${escapeHtml(family)} <small>${count}</small>
+          ${escapeHtml(family)}
         </button>`;
     })
     .join("");
@@ -943,25 +1146,39 @@ function timelineLabelFor(point, family) {
   return compactTimelineLabel(name);
 }
 
+function shouldBreakFrontierConnection(previousPoint, currentPoint) {
+  if (!previousPoint || !currentPoint) return false;
+  const isLlama65B = (point) => /^LLaMA-65B$/i.test(String(point.model));
+  const isEarlyGpt4 = (point) => /^gpt-4(?:-|_|$)/i.test(String(point.model));
+  return (
+    (isLlama65B(previousPoint) && isEarlyGpt4(currentPoint)) ||
+    (isEarlyGpt4(previousPoint) && isLlama65B(currentPoint))
+  );
+}
+
 function smoothTimelineEase(t) {
   return t * t * t * (t * (t * 6 - 15) + 10);
 }
 
 function drawTimelineLegend(ctx, width, pad, mode, metricLabel) {
+  const metricShortLabel = BENCHMARK_DIFFICULTY_METRICS[benchmarkTimelineMetric()]?.shortLabel || metricLabel;
   const items = mode === "benchmarks"
-    ? [{ type: "benchmark", label: `Benchmark · ${metricLabel}` }]
+    ? [{ type: "benchmark", label: `Benchmark · ${metricShortLabel}` }]
+    : mode === "models"
+    ? [{ type: "model", label: "Model capability" }]
     : [
-        { type: "model", label: `Model · ${TIMELINE_DISPLAY_LABEL}` },
-        { type: "benchmark", label: `Benchmark · ${metricLabel}` },
+        { type: "model", label: "Model · rank points" },
+        { type: "benchmark", label: `Benchmark · ${metricShortLabel}` },
       ];
-  const legendW = mode === "benchmarks" ? 188 : mode === "combined" ? 322 : 296;
+  const idealLegendW = mode === "benchmarks" ? 174 : mode === "combined" ? 286 : 152;
+  const legendW = Math.min(idealLegendW, width - pad.left - 8);
   const x0 = Math.max(pad.left + 12, width - pad.right - legendW);
   const y0 = pad.top - 46;
   let x = x0 + 12;
 
   ctx.save();
-  ctx.fillStyle = "rgba(248, 251, 255, 0.96)";
-  ctx.strokeStyle = "#cfe0f2";
+  ctx.fillStyle = themeColor("--tooltip-bg", "rgba(248, 245, 238, 0.96)");
+  ctx.strokeStyle = themeColor("--line", "#cfc8ba");
   ctx.lineWidth = 1;
   ctx.beginPath();
   ctx.roundRect(x0, y0, legendW, 30, 8);
@@ -984,14 +1201,14 @@ function drawTimelineLegend(ctx, width, pad, mode, metricLabel) {
       ctx.save();
       ctx.translate(x + 5, y0 + 15);
       ctx.rotate(Math.PI / 4);
-      ctx.fillStyle = "#bb524f";
+      ctx.fillStyle = themeColor("--accent", "#bb524f");
       ctx.globalAlpha = 0.82;
       ctx.fillRect(-4, -4, 8, 8);
       ctx.restore();
       ctx.globalAlpha = 1;
       x += 16;
     }
-    ctx.fillStyle = "#5f7088";
+    ctx.fillStyle = themeColor("--muted", "#6b675f");
     ctx.fillText(item.label, x, y0 + 15);
     x += ctx.measureText(item.label).width + 22;
   });
@@ -1100,6 +1317,14 @@ function renderTimeline(animation = null) {
   const metricKey = benchmarkTimelineMetric();
   const metricLabel = benchmarkTimelineMetricLabel();
   const mode = timelineViewMode();
+  const chartInk = themeColor("--ink", "#14233a");
+  const chartMuted = themeColor("--muted", "#5f7088");
+  const chartGrid = themeColor("--chart-grid", "rgba(31, 31, 28, 0.11)");
+  const chartGridSoft = themeColor("--chart-grid-soft", "rgba(31, 31, 28, 0.09)");
+  const chartAccent = themeColor("--accent", "#c15f3c");
+  const chartBlue = themeColor("--blue", "#1f68b3");
+  const chartInactive = themeColor("--chart-inactive", "#b5c5d6");
+  if (els.benchmarkMetricField) els.benchmarkMetricField.hidden = mode === "models";
   const modelPoints = attachTimelineDisplayScores(timelineData()
     .map((point) => ({ ...point, dateMs: new Date(`${point.release_date}T00:00:00`).getTime() }))
     .filter((point) => Number.isFinite(point.dateMs) && Number.isFinite(point.capability_sum))
@@ -1118,7 +1343,11 @@ function renderTimeline(animation = null) {
   const visibleBenchmarks = mode === "models"
     ? []
     : benchmarkPoints;
-  const xPoints = [...modelPoints, ...benchmarkPoints];
+  const xPoints = mode === "models"
+    ? modelPoints
+    : mode === "benchmarks"
+    ? benchmarkPoints
+    : [...modelPoints, ...benchmarkPoints];
   const isIntroAnimation = animation?.kind === "intro";
   const drawModelPoints = isIntroAnimation
     ? visibleModels.map((point, index) => {
@@ -1143,7 +1372,7 @@ function renderTimeline(animation = null) {
           ...point,
           timelineAlpha: 1,
           timelineActive: toDisplay.focused,
-          timelineColor: focusLevel > 0.5 ? toDisplay.color : "#b5c5d6",
+          timelineColor: focusLevel > 0.5 ? toDisplay.color : chartInactive,
           timelineBaseAlpha: 0.28 + focusLevel * 0.62,
         };
       })
@@ -1176,7 +1405,7 @@ function renderTimeline(animation = null) {
         ...point,
         timelineAlpha: 1,
         timelineActive: toDisplay.focused,
-        timelineColor: focusLevel > 0.5 ? toDisplay.color : "#b5c5d6",
+        timelineColor: focusLevel > 0.5 ? toDisplay.color : chartInactive,
         timelineBaseAlpha: 0.2 + focusLevel * 0.62,
       };
     }
@@ -1191,16 +1420,14 @@ function renderTimeline(animation = null) {
   });
 
   const timelineMeta = state.data?.timeline_metadata;
-  const timelineSource = timelineMeta
-    ? `masked_agg MIRT k=${timelineMeta.vector_dim} seed${timelineMeta.seed}`
-    : "active run capability sum";
+  const timelineSource = timelineMeta?.score_label || TIMELINE_CAPABILITY_LABEL;
   els.timelineSummary.textContent = `${TIMELINE_VIEW_MODES[mode]} · ${visibleModels.length} models · ${visibleBenchmarks.length} benchmarks · ${timelineSource}${state.timelineZoom ? " · zoomed" : ""}`;
   if (els.resetTimelineZoom) els.resetTimelineZoom.disabled = !state.timelineZoom;
   const { ctx, width, height } = canvasSetup(els.timelineCanvas);
   ctx.clearRect(0, 0, width, height);
 
   if ((!visibleModels.length && !visibleBenchmarks.length) || !xPoints.length) {
-    ctx.fillStyle = "#5f7088";
+    ctx.fillStyle = chartMuted;
     ctx.font = "14px system-ui";
     ctx.textAlign = "center";
     ctx.fillText("No dated points from 2023 onward for this view.", width / 2, height / 2);
@@ -1232,8 +1459,8 @@ function renderTimeline(animation = null) {
   const rawBenchMax = benchMaxRaw + benchPad;
   let minX = state.timelineZoom?.minX ?? rawMinX;
   let maxX = state.timelineZoom?.maxX ?? rawMaxX;
-  let minY = splitCombined ? rawModelMin : (state.timelineZoom?.minY ?? (mode === "benchmarks" ? rawBenchMin : rawModelMin));
-  let maxY = splitCombined ? rawModelMax : (state.timelineZoom?.maxY ?? (mode === "benchmarks" ? rawBenchMax : rawModelMax));
+  let minY = state.timelineZoom?.minY ?? (mode === "benchmarks" ? rawBenchMin : rawModelMin);
+  let maxY = state.timelineZoom?.maxY ?? (mode === "benchmarks" ? rawBenchMax : rawModelMax);
   const xSpan = maxX - minX || 1;
   const ySpan = maxY - minY || 1;
   const axisRight = width - pad.right;
@@ -1251,8 +1478,12 @@ function renderTimeline(animation = null) {
   const xScale = (value) => pad.left + ((value - minX) / xSpan) * plotW;
   const yScale = (value) => modelTop + (1 - (value - minY) / ySpan) * modelH;
 
-  const benchMin = mode === "benchmarks" && state.timelineZoom ? minY : rawBenchMin;
-  const benchMax = mode === "benchmarks" && state.timelineZoom ? maxY : rawBenchMax;
+  const benchMin = splitCombined
+    ? (state.timelineZoom?.minBenchY ?? rawBenchMin)
+    : mode === "benchmarks" ? minY : rawBenchMin;
+  const benchMax = splitCombined
+    ? (state.timelineZoom?.maxBenchY ?? rawBenchMax)
+    : mode === "benchmarks" ? maxY : rawBenchMax;
   const benchSpan = benchMax - benchMin || 1;
   const benchMainYScale = (value) => benchTop + (1 - (value - benchMin) / benchSpan) * benchH;
   const modelInView = (point) =>
@@ -1266,7 +1497,7 @@ function renderTimeline(animation = null) {
     (mode === "benchmarks"
       ? point.metricValue >= benchMin && point.metricValue <= benchMax
       : mode === "combined"
-      ? point.metricValue >= rawBenchMin && point.metricValue <= rawBenchMax
+      ? point.metricValue >= benchMin && point.metricValue <= benchMax
       : true);
   const drawModelPointsInView = drawModelPoints.filter(modelInView);
   const drawBenchmarkPointsInView = drawBenchmarkPoints.filter(benchmarkInView);
@@ -1276,11 +1507,12 @@ function renderTimeline(animation = null) {
     benchMin,
     eventBottom: splitCombined ? benchBottom : modelBottom,
     eventTop: modelTop,
+    maxBenchY: benchMax,
     maxX,
     maxY: mode === "benchmarks" ? benchMax : maxY,
+    minBenchY: benchMin,
     minX,
     minY: mode === "benchmarks" ? benchMin : minY,
-    lockY: splitCombined,
     mode,
     panelGap,
     benchBottom,
@@ -1292,13 +1524,15 @@ function renderTimeline(animation = null) {
     plotTop: splitCombined ? modelTop : (mode === "benchmarks" ? benchTop : modelTop),
     rawMaxX,
     rawMaxY: mode === "benchmarks" ? rawBenchMax : rawModelMax,
+    rawMaxBenchY: rawBenchMax,
     rawMinX,
     rawMinY: mode === "benchmarks" ? rawBenchMin : rawModelMin,
+    rawMinBenchY: rawBenchMin,
   };
 
-  ctx.strokeStyle = "#cfe0f2";
+  ctx.strokeStyle = chartGrid;
   ctx.lineWidth = 1;
-  ctx.fillStyle = "#5f7088";
+  ctx.fillStyle = chartMuted;
   ctx.font = "12px system-ui";
   ctx.textAlign = "right";
   const drawYGrid = (minValue, span, scale, top, bottom, labelDigits) => {
@@ -1310,41 +1544,40 @@ function renderTimeline(animation = null) {
       ctx.lineTo(axisRight, y);
       ctx.stroke();
       ctx.textAlign = "right";
-      ctx.fillStyle = "#5f7088";
-      ctx.fillText(fmt(value, labelDigits), pad.left - 10, y + 4);
+      ctx.fillStyle = chartMuted;
+      ctx.fillText(mode === "models" ? compactAxisNumber(value, labelDigits) : fmt(value, labelDigits), pad.left - 10, y + 4);
     }
-    ctx.strokeStyle = "#14233a";
+    ctx.strokeStyle = chartInk;
     ctx.beginPath();
     ctx.moveTo(pad.left, top);
     ctx.lineTo(pad.left, bottom);
     ctx.lineTo(axisRight, bottom);
     ctx.stroke();
-    ctx.strokeStyle = "#cfe0f2";
+    ctx.strokeStyle = chartGrid;
   };
 
   if (mode === "benchmarks" && hasBenchAxis) {
     drawYGrid(benchMin, benchSpan, benchMainYScale, benchTop, benchBottom, 2);
   } else {
-    drawYGrid(minY, ySpan, yScale, modelTop, modelBottom, 3);
+    drawYGrid(minY, ySpan, yScale, modelTop, modelBottom, TIMELINE_SCORE_DIGITS);
     if (splitCombined) {
       drawYGrid(benchMin, benchSpan, benchMainYScale, benchTop, benchBottom, 2);
-      ctx.strokeStyle = "#14233a";
+      ctx.strokeStyle = chartInk;
       ctx.globalAlpha = 0.3;
       ctx.beginPath();
       ctx.moveTo(pad.left, modelBottom);
       ctx.lineTo(pad.left, benchTop);
       ctx.stroke();
       ctx.globalAlpha = 1;
-      ctx.strokeStyle = "#cfe0f2";
+      ctx.strokeStyle = chartGrid;
     }
   }
 
   ctx.textAlign = "center";
-  const minYear = new Date(minX).getFullYear();
-  const maxYear = new Date(maxX).getFullYear();
-  for (let year = minYear; year <= maxYear; year += 1) {
-    const x = xScale(new Date(`${year}-01-01T00:00:00`).getTime());
-    if (x < pad.left || x > axisRight) continue;
+  ctx.strokeStyle = chartGridSoft;
+  timelineDateTicks(minX, maxX).forEach((tick) => {
+    const x = xScale(tick.value);
+    if (x < pad.left || x > axisRight) return;
     const verticalSegments = splitCombined
       ? [[modelTop, benchBottom]]
       : [[mode === "benchmarks" ? benchTop : modelTop, mode === "benchmarks" ? benchBottom : modelBottom]];
@@ -1354,15 +1587,16 @@ function renderTimeline(animation = null) {
       ctx.lineTo(x, segmentBottom);
       ctx.stroke();
     });
-    ctx.fillText(String(year), x, height - pad.bottom + 24);
-  }
+    ctx.fillStyle = chartMuted;
+    ctx.fillText(tick.label, x, height - pad.bottom + 24);
+  });
 
   if (splitCombined) {
-    ctx.fillStyle = "#14233a";
+    ctx.fillStyle = chartInk;
     ctx.font = "13px system-ui";
     ctx.textAlign = "left";
     ctx.fillText("Models", pad.left + 8, modelTop - 14);
-    ctx.fillStyle = "#1f68b3";
+    ctx.fillStyle = chartBlue;
     ctx.fillText("Benchmarks", pad.left + 8, benchTop - 14);
   }
 
@@ -1377,11 +1611,28 @@ function renderTimeline(animation = null) {
     }
   });
 
+  const frontierPoints = sortedByDate.filter((point) => point.isTopLayer);
+  if (mode !== "benchmarks" && frontierPoints.length > 1) {
+    ctx.save();
+    ctx.strokeStyle = chartAccent;
+    ctx.globalAlpha = state.selectedFamily === "All" ? 0.42 : 0.64;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    frontierPoints.forEach((point, index) => {
+      const x = xScale(point.dateMs);
+      const y = yScale(point.timelineDisplayScore) + (point.timelineRise || 0);
+      if (index === 0 || shouldBreakFrontierConnection(frontierPoints[index - 1], point)) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+    ctx.restore();
+  }
+
   if (mode !== "benchmarks") {
     drawModelPointsInView.forEach((point) => {
       const x = xScale(point.dateMs);
       const y = yScale(point.timelineDisplayScore) + (point.timelineRise || 0);
-      const baseRadius = point.isTopLayer ? 4.2 : 3.4;
+      const baseRadius = point.isTopLayer ? 4.8 : 3.5;
       const radius = baseRadius * (0.76 + point.timelineAlpha * 0.24);
       point.canvasX = x;
       point.canvasY = y;
@@ -1394,7 +1645,7 @@ function renderTimeline(animation = null) {
       ctx.globalAlpha = 1;
       const label = timelineLabelFor(point, state.selectedFamily);
       if (label && point.timelineAlpha > 0.72) {
-        ctx.fillStyle = "#5f7088";
+        ctx.fillStyle = chartMuted;
         ctx.globalAlpha = point.timelineAlpha;
         ctx.font = "10px system-ui";
         ctx.textAlign = "left";
@@ -1417,14 +1668,14 @@ function renderTimeline(animation = null) {
       ctx.rotate(Math.PI / 4);
       ctx.fillStyle = point.timelineActive
         ? metricColor(point.metricValue, benchMinRaw, benchMaxRaw)
-        : point.timelineColor || "#b5c5d6";
+        : point.timelineColor || chartInactive;
       ctx.globalAlpha = (point.timelineActive ? 0.9 : point.timelineBaseAlpha ?? 0.2) * point.timelineAlpha;
       ctx.fillRect(-radius, -radius, radius * 2, radius * 2);
       ctx.restore();
       ctx.globalAlpha = 1;
 
       if (point.timelineActive && point.metricValue >= quantile(benchmarkPoints.map((item) => item.metricValue), 0.82)) {
-        ctx.fillStyle = "#5f7088";
+        ctx.fillStyle = chartMuted;
         ctx.font = "10px system-ui";
         ctx.textAlign = "left";
         ctx.fillText(compactTimelineLabel(point.model), x + 7, y - 6);
@@ -1446,7 +1697,7 @@ function renderTimeline(animation = null) {
       ctx.rotate(Math.PI / 4);
       ctx.fillStyle = point.timelineActive
         ? metricColor(point.metricValue, benchMinRaw, benchMaxRaw)
-        : point.timelineColor || "#b5c5d6";
+        : point.timelineColor || chartInactive;
       const activeAlpha = 0.58 + strength * 0.34;
       ctx.globalAlpha = (point.timelineActive ? activeAlpha : point.timelineBaseAlpha ?? 0.2) * point.timelineAlpha;
       ctx.fillRect(-radius, -radius, radius * 2, radius * 2);
@@ -1455,7 +1706,7 @@ function renderTimeline(animation = null) {
     });
   }
 
-  ctx.fillStyle = "#14233a";
+  ctx.fillStyle = chartInk;
   ctx.font = "12px system-ui";
   ctx.textAlign = "center";
   ctx.fillText("Release date", pad.left + plotW / 2, isHeroMode ? height - 58 : height - 12);
@@ -1463,10 +1714,10 @@ function renderTimeline(animation = null) {
     ctx.save();
     ctx.translate(20, modelTop + modelH / 2);
     ctx.rotate(-Math.PI / 2);
-    ctx.fillText(TIMELINE_DISPLAY_LABEL, 0, 0);
+    ctx.fillText(TIMELINE_AXIS_LABEL, 0, 0);
     ctx.restore();
     ctx.save();
-    ctx.fillStyle = "#1f68b3";
+    ctx.fillStyle = chartBlue;
     ctx.translate(20, benchTop + benchH / 2);
     ctx.rotate(-Math.PI / 2);
     ctx.fillText(`Benchmark ${metricLabel}`, 0, 0);
@@ -1481,7 +1732,7 @@ function renderTimeline(animation = null) {
     ctx.save();
     ctx.translate(20, modelTop + modelH / 2);
     ctx.rotate(-Math.PI / 2);
-    ctx.fillText(TIMELINE_DISPLAY_LABEL, 0, 0);
+    ctx.fillText(TIMELINE_AXIS_LABEL, 0, 0);
     ctx.restore();
   }
 
@@ -1490,6 +1741,16 @@ function renderTimeline(animation = null) {
     ...drawBenchmarkPointsInView,
   ];
   state.timelinePoints = hitPoints;
+  const searchPoint = hitPoints.find((point) => timelineSearchKey(point) === state.timelineSearchSelection);
+  if (searchPoint) {
+    ctx.save();
+    ctx.strokeStyle = chartAccent;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(searchPoint.canvasX, searchPoint.canvasY, 10, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  }
   renderTimelineHitLayer(hitPoints);
 }
 
@@ -1497,7 +1758,7 @@ function showTimelineTooltip(point, x, y) {
   els.timelineTooltip.hidden = false;
   const detail = point.pointType === "benchmark"
     ? `Benchmark · ${escapeHtml(point.release_date)} · ${benchmarkTimelineMetricLabel()} ${fmt(point.metricValue, 3)}`
-    : `${escapeHtml(point.family)} · ${escapeHtml(point.release_date)} · ${TIMELINE_DISPLAY_LABEL} ${fmt(point.timelineDisplayScore, 3)}${Number.isFinite(point.timelinePercentileScore) ? ` · ${TIMELINE_PERCENTILE_LABEL} ${fmt(point.timelinePercentileScore, 1)}` : ""}${Number.isFinite(point.rank) ? ` · rank ${point.rank}` : ""}`;
+    : `${escapeHtml(point.family)} · ${escapeHtml(point.release_date)} · ${TIMELINE_DISPLAY_LABEL} ${fmt(point.timelineDisplayScore, TIMELINE_SCORE_DIGITS)}${Number.isFinite(point.timelinePercentileScore) ? ` · ${TIMELINE_PERCENTILE_LABEL} ${fmt(point.timelinePercentileScore, 1)}` : ""}${Number.isFinite(point.rank) ? ` · rank ${point.rank}` : ""}`;
   els.timelineTooltip.innerHTML = `
     <strong>${escapeHtml(point.model)}</strong>
     <span>${detail}</span>
@@ -1542,38 +1803,67 @@ function pointInsideTimelinePlot(point) {
 
 function clampTimelineZoom(zoom, plot = state.timelinePlot) {
   if (!plot || !zoom) return null;
-  const rawXSpan = plot.rawMaxX - plot.rawMinX || 1;
-  const rawYSpan = plot.rawMaxY - plot.rawMinY || 1;
-  let xSpan = clamp(zoom.maxX - zoom.minX, rawXSpan / 120, rawXSpan);
-  let ySpan = plot.lockY ? rawYSpan : clamp(zoom.maxY - zoom.minY, rawYSpan / 80, rawYSpan);
-  let minX = zoom.minX;
-  let maxX = minX + xSpan;
-  let minY = plot.lockY ? plot.rawMinY : zoom.minY;
-  let maxY = minY + ySpan;
+  const clampRange = (min, max, rawMin, rawMax, minimumFraction) => {
+    const rawSpan = rawMax - rawMin || 1;
+    const span = clamp(max - min, rawSpan * minimumFraction, rawSpan);
+    let nextMin = min;
+    let nextMax = nextMin + span;
+    if (nextMin < rawMin) {
+      nextMin = rawMin;
+      nextMax = nextMin + span;
+    }
+    if (nextMax > rawMax) {
+      nextMax = rawMax;
+      nextMin = nextMax - span;
+    }
+    return { min: nextMin, max: nextMax };
+  };
 
-  if (minX < plot.rawMinX) {
-    minX = plot.rawMinX;
-    maxX = minX + xSpan;
-  }
-  if (maxX > plot.rawMaxX) {
-    maxX = plot.rawMaxX;
-    minX = maxX - xSpan;
-  }
-  if (plot.lockY) {
-    minY = plot.rawMinY;
-    maxY = plot.rawMaxY;
-  } else if (minY < plot.rawMinY) {
-    minY = plot.rawMinY;
-    maxY = minY + ySpan;
-  }
-  if (!plot.lockY && maxY > plot.rawMaxY) {
-    maxY = plot.rawMaxY;
-    minY = maxY - ySpan;
-  }
+  const xRange = clampRange(zoom.minX, zoom.maxX, plot.rawMinX, plot.rawMaxX, 1 / 120);
+  const yRange = clampRange(zoom.minY, zoom.maxY, plot.rawMinY, plot.rawMaxY, 1 / 80);
+  const benchmarkRange = plot.mode === "combined"
+    ? clampRange(
+        zoom.minBenchY ?? plot.minBenchY,
+        zoom.maxBenchY ?? plot.maxBenchY,
+        plot.rawMinBenchY,
+        plot.rawMaxBenchY,
+        1 / 80
+      )
+    : { min: plot.rawMinBenchY, max: plot.rawMaxBenchY };
 
-  const isFullX = Math.abs(minX - plot.rawMinX) < 1 && Math.abs(maxX - plot.rawMaxX) < 1;
-  const isFullY = plot.lockY || (Math.abs(minY - plot.rawMinY) < 0.001 && Math.abs(maxY - plot.rawMaxY) < 0.001);
-  return isFullX && isFullY ? null : { minX, maxX, minY, maxY };
+  const isFullX = Math.abs(xRange.min - plot.rawMinX) < 1 && Math.abs(xRange.max - plot.rawMaxX) < 1;
+  const isFullY = Math.abs(yRange.min - plot.rawMinY) < 0.001 && Math.abs(yRange.max - plot.rawMaxY) < 0.001;
+  const isFullBenchmarkY = plot.mode !== "combined" || (
+    Math.abs(benchmarkRange.min - plot.rawMinBenchY) < 0.001 &&
+    Math.abs(benchmarkRange.max - plot.rawMaxBenchY) < 0.001
+  );
+  return isFullX && isFullY && isFullBenchmarkY ? null : {
+    minX: xRange.min,
+    maxX: xRange.max,
+    minY: yRange.min,
+    maxY: yRange.max,
+    minBenchY: benchmarkRange.min,
+    maxBenchY: benchmarkRange.max,
+  };
+}
+
+function timelineZoomSnapshot(plot = state.timelinePlot) {
+  if (!plot) return null;
+  return {
+    minX: plot.minX,
+    maxX: plot.maxX,
+    minY: plot.minY,
+    maxY: plot.maxY,
+    minBenchY: plot.minBenchY,
+    maxBenchY: plot.maxBenchY,
+  };
+}
+
+function timelinePanelAtPoint(point, plot = state.timelinePlot) {
+  if (!plot || plot.mode !== "combined") return "primary";
+  if (point.y >= plot.modelTop && point.y <= plot.modelBottom) return "model";
+  if (point.y >= plot.benchTop && point.y <= plot.benchBottom) return "benchmark";
+  return "time";
 }
 
 function resetTimelineZoom() {
@@ -1592,22 +1882,40 @@ function handleTimelineWheel(event) {
   hideTimelineTooltip();
 
   const plotW = plot.axisRight - plot.padLeft || 1;
-  const plotH = plot.plotBottom - plot.plotTop || 1;
   const xRatio = clamp((point.x - plot.padLeft) / plotW, 0, 1);
-  const yRatio = clamp((point.y - plot.plotTop) / plotH, 0, 1);
   const xSpan = plot.maxX - plot.minX || 1;
-  const ySpan = plot.maxY - plot.minY || 1;
   const xValue = plot.minX + xRatio * xSpan;
-  const yValue = plot.maxY - yRatio * ySpan;
   const scale = clamp(Math.exp(event.deltaY * 0.0012), 0.55, 1.8);
   const nextXSpan = xSpan * scale;
-  const nextYSpan = ySpan * scale;
-  state.timelineZoom = clampTimelineZoom({
+  const nextZoom = {
     minX: xValue - xRatio * nextXSpan,
     maxX: xValue + (1 - xRatio) * nextXSpan,
-    minY: yValue - (1 - yRatio) * nextYSpan,
-    maxY: yValue + yRatio * nextYSpan,
-  }, plot);
+    minY: plot.minY,
+    maxY: plot.maxY,
+    minBenchY: plot.minBenchY,
+    maxBenchY: plot.maxBenchY,
+  };
+  const panel = timelinePanelAtPoint(point, plot);
+  if (panel === "benchmark") {
+    const panelH = plot.benchBottom - plot.benchTop || 1;
+    const yRatio = clamp((point.y - plot.benchTop) / panelH, 0, 1);
+    const ySpan = plot.maxBenchY - plot.minBenchY || 1;
+    const yValue = plot.maxBenchY - yRatio * ySpan;
+    const nextYSpan = ySpan * scale;
+    nextZoom.minBenchY = yValue - (1 - yRatio) * nextYSpan;
+    nextZoom.maxBenchY = yValue + yRatio * nextYSpan;
+  } else if (panel === "model" || panel === "primary") {
+    const panelTop = panel === "model" ? plot.modelTop : plot.plotTop;
+    const panelBottom = panel === "model" ? plot.modelBottom : plot.plotBottom;
+    const panelH = panelBottom - panelTop || 1;
+    const yRatio = clamp((point.y - panelTop) / panelH, 0, 1);
+    const ySpan = plot.maxY - plot.minY || 1;
+    const yValue = plot.maxY - yRatio * ySpan;
+    const nextYSpan = ySpan * scale;
+    nextZoom.minY = yValue - (1 - yRatio) * nextYSpan;
+    nextZoom.maxY = yValue + yRatio * nextYSpan;
+  }
+  state.timelineZoom = clampTimelineZoom(nextZoom, plot);
   renderTimeline();
 }
 
@@ -1618,7 +1926,8 @@ function handleTimelineMouseDown(event) {
   state.timelineDrag = {
     active: true,
     start: point,
-    zoomStart: { ...state.timelineZoom },
+    panel: timelinePanelAtPoint(point, state.timelinePlot),
+    zoomStart: timelineZoomSnapshot(state.timelinePlot),
   };
   hideTimelineTooltip();
   event.preventDefault();
@@ -1656,17 +1965,31 @@ function handleTimelinePointerMove(event) {
     const drag = state.timelineDrag;
     if (!plot || !drag.zoomStart) return;
     const plotW = plot.axisRight - plot.padLeft || 1;
-    const plotH = plot.plotBottom - plot.plotTop || 1;
     const xSpan = drag.zoomStart.maxX - drag.zoomStart.minX || 1;
-    const ySpan = drag.zoomStart.maxY - drag.zoomStart.minY || 1;
     const dx = x - drag.start.x;
     const dy = y - drag.start.y;
-    state.timelineZoom = clampTimelineZoom({
+    const nextZoom = {
       minX: drag.zoomStart.minX - (dx / plotW) * xSpan,
       maxX: drag.zoomStart.maxX - (dx / plotW) * xSpan,
-      minY: drag.zoomStart.minY + (dy / plotH) * ySpan,
-      maxY: drag.zoomStart.maxY + (dy / plotH) * ySpan,
-    }, plot);
+      minY: drag.zoomStart.minY,
+      maxY: drag.zoomStart.maxY,
+      minBenchY: drag.zoomStart.minBenchY,
+      maxBenchY: drag.zoomStart.maxBenchY,
+    };
+    if (drag.panel === "benchmark") {
+      const panelH = plot.benchBottom - plot.benchTop || 1;
+      const ySpan = drag.zoomStart.maxBenchY - drag.zoomStart.minBenchY || 1;
+      nextZoom.minBenchY += (dy / panelH) * ySpan;
+      nextZoom.maxBenchY += (dy / panelH) * ySpan;
+    } else if (drag.panel === "model" || drag.panel === "primary") {
+      const panelH = drag.panel === "model"
+        ? plot.modelBottom - plot.modelTop || 1
+        : plot.plotBottom - plot.plotTop || 1;
+      const ySpan = drag.zoomStart.maxY - drag.zoomStart.minY || 1;
+      nextZoom.minY += (dy / panelH) * ySpan;
+      nextZoom.maxY += (dy / panelH) * ySpan;
+    }
+    state.timelineZoom = clampTimelineZoom(nextZoom, plot);
     hideTimelineTooltip();
     els.timelineCanvas.style.cursor = "grabbing";
     renderTimeline();
@@ -1754,15 +2077,15 @@ function renderFitImage() {
   if (run.metadata.source_name === "local_finetune") {
     els.fitImage.hidden = true;
     els.fitImage.removeAttribute("src");
-    els.fitImage.alt = "当前 freeze 运行未提供拟合图";
-    els.fitImageSource.textContent = "当前 freeze 下载仅包含参数与诊断数据，未包含 outputs/model_fit 拟合图";
+    els.fitImage.alt = "Fit visualization is unavailable for the current data freeze";
+    els.fitImageSource.textContent = "The current freeze contains parameters and diagnostics, but no model-fit figure.";
     return;
   }
   const runTag = run.metadata.run_tag?.startsWith("extend") ? run.metadata.run_tag : FIT_IMAGE_FALLBACK_RUN_TAG;
   els.fitImage.hidden = false;
   els.fitImage.src = fitImagePath(runTag);
-  els.fitImage.alt = `拟合可视化：${runTag}`;
-  els.fitImageSource.textContent = `远端 outputs/model_fit/train_${runTag}.pdf`;
+  els.fitImage.alt = `Fit visualization: ${runTag}`;
+  els.fitImageSource.textContent = `Source: outputs/model_fit/train_${runTag}.pdf`;
 }
 
 function canvasSetup(canvas) {
@@ -1829,7 +2152,10 @@ function drawFitScatter(rows) {
 }
 
 function renderRunDependentViews() {
+  state.heroActive = false;
+  state.dashboardRendered = true;
   hydrateStats();
+  renderBridgeReliability();
   renderSortOptions();
   state.selectedModel = null;
   state.selectedBenchmark = null;
@@ -1862,11 +2188,49 @@ function bindEvents() {
     renderBenchmarkDetail();
   }));
   [els.heatmapType, els.heatmapSortTag, els.heatmapLimit].forEach((el) => el.addEventListener("input", renderHeatmap));
+  els.timelineSearchToggle.addEventListener("click", () => setTimelineSearchOpen(els.timelineSearchPanel.hidden));
+  els.timelineSearchInput.addEventListener("input", () => {
+    if (!els.timelineSearchInput.value.trim() && state.timelineSearchSelection) {
+      state.timelineSearchSelection = null;
+      hideTimelineTooltip();
+      renderTimeline();
+    }
+    renderTimelineSearchResults();
+  });
+  els.timelineSearchClear.addEventListener("click", () => {
+    els.timelineSearchInput.value = "";
+    state.timelineSearchSelection = null;
+    hideTimelineTooltip();
+    renderTimeline();
+    renderTimelineSearchResults();
+    els.timelineSearchInput.focus();
+  });
+  els.timelineSearchInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      const first = timelineSearchMatches()[0];
+      if (first) locateTimelineSearchPoint(first);
+      event.preventDefault();
+    } else if (event.key === "ArrowDown") {
+      els.timelineSearchResults.querySelector("button")?.focus();
+      event.preventDefault();
+    }
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !els.timelineSearchPanel.hidden) {
+      setTimelineSearchOpen(false);
+      els.timelineSearchToggle.focus();
+    }
+  });
+  document.addEventListener("click", (event) => {
+    if (!event.target.closest(".timeline-search")) setTimelineSearchOpen(false);
+  });
   els.timelineViewMode.addEventListener("input", () => {
     if (state.timelineAnimation) cancelAnimationFrame(state.timelineAnimation);
     state.timelineAnimation = null;
     state.timelineIntroPlayed = true;
     state.timelineViewMode = els.timelineViewMode.value;
+    state.timelineSearchSelection = null;
+    renderTimelineSearchResults();
     state.timelineZoom = null;
     hideTimelineTooltip();
     renderTimeline();
@@ -1898,17 +2262,16 @@ function bindEvents() {
 }
 
 async function init() {
+  syncDocumentThemeColor();
   const dataUrl = new URL("./data/dashboard_data_20260616.json", window.location.href);
-  dataUrl.searchParams.set("v", "20260713-freeze-finetune");
+  dataUrl.searchParams.set("v", "20260901-editorial");
   dataUrl.searchParams.set("t", String(Date.now()));
   const response = await fetch(dataUrl, { cache: "no-store" });
   if (!response.ok) throw new Error(`Failed to load ${dataUrl.pathname}: ${response.status}`);
   state.data = await response.json();
   populateControls();
   bindEvents();
-  enableHeroMode();
-  renderCanvasFamilyLegend();
-  animateTimelineIntro();
+  renderRunDependentViews();
 }
 
 init().catch((error) => {
