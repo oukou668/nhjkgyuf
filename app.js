@@ -1,5 +1,7 @@
 const state = {
   data: null,
+  itemExamples: null,
+  itemExamplesError: false,
   selectedModel: null,
   selectedBenchmark: null,
   selectedRunTag: null,
@@ -23,11 +25,11 @@ const FIT_IMAGE_FALLBACK_RUN_TAG = "extend4689_buck_meansafe_bce_corrloss_wogamm
 const TIMELINE_START_DATE = "2023-01-01";
 const TIMELINE_START_MS = new Date(`${TIMELINE_START_DATE}T00:00:00`).getTime();
 const TIMELINE_RIGHT_PADDING_MS = 70 * 24 * 60 * 60 * 1000;
-const TIMELINE_CAPABILITY_LABEL = "Imputed benchmark rank points";
-const TIMELINE_DISPLAY_LABEL = "Imputed benchmark rank points";
-const TIMELINE_AXIS_LABEL = "Capability rank points";
-const TIMELINE_PERCENTILE_LABEL = "Points percentile";
-const TIMELINE_SCORE_DIGITS = 1;
+const TIMELINE_CAPABILITY_LABEL = "Mean latent ability";
+const TIMELINE_DISPLAY_LABEL = "Mean latent ability";
+const TIMELINE_AXIS_LABEL = "Mean latent ability";
+const TIMELINE_PERCENTILE_LABEL = "Ability percentile";
+const TIMELINE_SCORE_DIGITS = 3;
 const BENCHMARK_DIFFICULTY_METRICS = {
   difficulty_b_scaled: { label: "Difficulty × scale", shortLabel: "b × scale" },
   difficulty_b: { label: "Difficulty b", shortLabel: "b" },
@@ -324,7 +326,7 @@ function renderSortOptions() {
 function renderHeatmapSortOptions() {
   const tags = state.data.tag_bridge?.tags?.length ? state.data.tag_bridge.tags : state.data.tags;
   const current = els.heatmapSortTag.value || "";
-  els.heatmapSortTag.innerHTML = `<option value="">Overall / bridge score</option>${tags
+  els.heatmapSortTag.innerHTML = `<option value="">Mean latent ability</option>${tags
     .map((tag) => `<option value="${escapeHtml(tag)}">${escapeHtml(tag)}</option>`)
     .join("")}`;
   els.heatmapSortTag.value = tags.includes(current) ? current : "";
@@ -462,6 +464,7 @@ function selectedOptionLabel(selectEl) {
 }
 
 function rankMapForSort(items, sortKey, vectorKey, idKey) {
+  if (sortKey === "timeline_rank") return new Map(items.map((item) => [item[idKey], item.timeline_rank]));
   const sorted = sortRowsForKey(
     items.filter((item) => Number.isFinite(getSortValue(item, sortKey, vectorKey))),
     sortKey,
@@ -497,7 +500,7 @@ function renderModels() {
       <tr class="selectable ${state.selectedModel?.model === model.model ? "active" : ""}" data-model="${escapeHtml(model.model)}">
         <td>${ranks.get(model.model) ?? "--"}</td>
         <td class="name-cell">${escapeHtml(model.model)}</td>
-        <td>${fmt(model.capability_l2)}</td>
+        <td>${fmt(model.capability_mean, 3)}</td>
       </tr>`
     )
     .join("");
@@ -607,7 +610,7 @@ function renderModelDetail() {
   const timelineRank = model.rank ?? timelineRankMap().get(model.model);
   const bridgeScores = modelBridgeTagScores(model.model);
   els.modelDetailTitle.textContent = model.model;
-  els.modelDetailScore.textContent = `rank ${fmt(timelineRank, 0)} · L2 ${fmt(model.capability_l2)}`;
+  els.modelDetailScore.textContent = `rank ${fmt(timelineRank, 0)} · mean ${fmt(model.capability_mean, 3)}`;
   renderTagBars(els.modelBars, bridgeScores || model.tag_scores, { centerZero: Boolean(bridgeScores) });
 }
 
@@ -698,7 +701,7 @@ function renderHeatmap() {
       .map((model) => ({
         model: model.model,
         tag_values: columns.map((tag) => model.tag_scores?.[tag] ?? 0),
-        capability_sum: model.capability_sum ?? 0,
+        capability_sum: model.capability_mean ?? 0,
         tag_score_sum: model.tag_score_sum ?? 0,
         bridge_rank_score: model.bridge_rank_score ?? null,
       }))
@@ -707,7 +710,6 @@ function renderHeatmap() {
           const tagDelta = (b.tag_values[sortTagIndex] ?? 0) - (a.tag_values[sortTagIndex] ?? 0);
           if (Math.abs(tagDelta) > 1e-12) return tagDelta;
         }
-        if (tagBridge?.models?.length) return (b.bridge_rank_score ?? 0) - (a.bridge_rank_score ?? 0);
         return b.capability_sum - a.capability_sum;
       })
       .slice(0, limit);
@@ -721,7 +723,7 @@ function renderHeatmap() {
     rows = (isModel ? run.models : run.benchmarks)
       .slice()
       .sort((a, b) =>
-        isModel ? b.capability_sum - a.capability_sum : (b.difficulty_score ?? b.difficulty_sum) - (a.difficulty_score ?? a.difficulty_sum)
+        isModel ? b.capability_mean - a.capability_mean : (b.difficulty_score ?? b.difficulty_sum) - (a.difficulty_score ?? a.difficulty_sum)
       )
       .slice(0, limit);
     vectorKey = isModel ? "estimated_capability" : "estimated_difficulty";
@@ -784,9 +786,53 @@ function renderHeatmap() {
   }
 }
 
+function renderTagExamples(tag) {
+  if (state.itemExamplesError) return `<p class="tag-note">Item examples could not be loaded. <button class="tag-examples-retry" type="button">Retry</button></p>`;
+  if (!state.itemExamples) return `<p class="tag-note">Loading item examples…</p>`;
+  const summary = state.itemExamples.tags[tag];
+  const items = (summary?.top_items || []).map((id) => state.itemExamples.items[id]).filter(Boolean);
+  const renderItems = (rows) => rows.map((item) => {
+      const annotation = item.annotations[tag];
+      const preview = item.question.replace(/\s+/g, " ");
+      const url = `./item.html?id=${encodeURIComponent(item.id)}&tag=${encodeURIComponent(tag)}`;
+      return `<li>
+        <div class="tag-example-heading"><span>${escapeHtml(item.dataset)}</span><strong>${fmt(annotation.score, 0)} / 5</strong></div>
+        <p class="tag-example-preview" dir="auto">${escapeHtml(preview.slice(0, 220))}${preview.length > 220 ? "…" : ""}</p>
+        <p class="tag-example-rationale" dir="auto">${escapeHtml(annotation.rationale || "No rationale recorded.")}</p>
+        <a class="tag-example-link" href="${url}" target="_blank" rel="noopener">View full item ↗<span class="sr-only"> (opens in a new tab)</span></a>
+      </li>`;
+    }).join("");
+  return `<section class="tag-examples" aria-label="Highest-scoring items">
+    <h4>Highest-scoring items</h4>
+    <p class="tag-example-meta">${summary?.annotated_items || 0} annotated items · tag demand / 5</p>
+    ${items.length ? `<ol>${renderItems(items.slice(0, 3))}</ol>
+      ${items.length > 3 ? `<details class="tag-more-items"><summary>Show ${items.length - 3} more items (${items.length} total)</summary><ol start="4">${renderItems(items.slice(3))}</ol></details>` : ""}` : `<p class="tag-note">${summary?.annotated_items ? "No positive-score items in the available annotations." : "No item annotations available for this tag in the local snapshot."}</p>`}
+  </section>`;
+}
+
+async function loadTagExamples() {
+  const restoreInitialAnchor = !state.itemExamples && !state.itemExamplesError;
+  state.itemExamplesError = false;
+  try {
+    const response = await fetch("./data/tag_item_examples.json", { cache: "no-store" });
+    if (!response.ok) throw new Error(`Item examples: ${response.status}`);
+    state.itemExamples = await response.json();
+    const meta = state.itemExamples.metadata;
+    $("#tagExamplesScope").textContent = `Current constructs with up to 10 items by annotation score. The first 3 are shown; expand each tag to see more. Examples cover ${meta.item_count.toLocaleString()} local items across ${meta.dataset_count} datasets. Scores measure tag demand (0–5); ties use annotation confidence. Open an item for its full question and annotation.`;
+  } catch (error) {
+    state.itemExamplesError = true;
+    console.error(error);
+  }
+  renderTags();
+  if (restoreInitialAnchor && (location.hash === "#tagsView" || location.hash.startsWith("#construct-"))) {
+    document.getElementById(decodeURIComponent(location.hash.slice(1)))?.scrollIntoView({ block: "start" });
+  }
+}
+
 function renderTags() {
   const activity = state.data.tag_reference?.activity || [];
-  const rubricTags = state.data.tag_reference?.rubric_tags || [];
+  const currentTags = new Set(state.data.tags);
+  const rubricTags = (state.data.tag_reference?.rubric_tags || []).filter((tag) => currentTags.has(tag.tag));
   if (rubricTags.length) {
     const activityByTag = new Map(activity.map((tag) => [tag.tag, tag]));
     els.tagCards.innerHTML = rubricTags
@@ -795,7 +841,7 @@ function renderTags() {
         const hasActivity = activityByTag.has(rubricTag.tag);
         const anchors = Object.entries(rubricTag.anchors || {}).sort(([a], [b]) => Number(a) - Number(b));
         return `
-        <article class="tag-card ${hasActivity ? "" : "tag-card-muted"}">
+        <article id="construct-${escapeHtml(tag.tag)}" class="tag-card ${hasActivity ? "" : "tag-card-muted"}">
           <div class="tag-card-head">
             <h3>${escapeHtml(tag.zh || tag.tag)}</h3>
             <span>${escapeHtml(tag.head_description || tag.head || "Construct")}</span>
@@ -846,6 +892,7 @@ function renderTags() {
               </ul>
             </details>
           ` : ""}
+          ${renderTagExamples(tag.tag)}
         </article>`;
       })
       .join("");
@@ -898,7 +945,7 @@ function timelineData() {
         model: point.model,
         family: point.family,
         release_date: point.release_date,
-        capability_sum: point.capability_sum ?? point.rank_points_total ?? point.difficulty_weighted_imputed_score,
+        capability_sum: point.capability_mean,
         rank: point.rank,
       }));
   }
@@ -909,7 +956,8 @@ function timelineData() {
       model: model.model,
       family: model.family,
       release_date: model.release_date,
-      capability_sum: model.capability_sum,
+      capability_sum: model.capability_mean,
+      rank: model.rank,
     }));
 }
 
@@ -936,8 +984,7 @@ function benchmarkTimelineData() {
 }
 
 function attachTimelineDisplayScores(points) {
-  const rankedPoints = points.filter((point) => Number.isFinite(point.rank));
-  const maxRank = rankedPoints.length ? Math.max(...rankedPoints.map((point) => point.rank)) : 0;
+  const maxRank = state.data.metadata.model_count;
   if (maxRank > 1) {
     return points.map((point) => ({
       ...point,
@@ -1167,7 +1214,7 @@ function drawTimelineLegend(ctx, width, pad, mode, metricLabel) {
     : mode === "models"
     ? [{ type: "model", label: "Model capability" }]
     : [
-        { type: "model", label: "Model · rank points" },
+        { type: "model", label: "Model · mean ability" },
         { type: "benchmark", label: `Benchmark · ${metricShortLabel}` },
       ];
   const idealLegendW = mode === "benchmarks" ? 174 : mode === "combined" ? 286 : 152;
@@ -2074,7 +2121,7 @@ function fitImagePath(runTag) {
 
 function renderFitImage() {
   const run = activeRun();
-  if (run.metadata.source_name === "local_finetune") {
+  if (["local_finetune", "v7"].includes(run.metadata.source_name)) {
     els.fitImage.hidden = true;
     els.fitImage.removeAttribute("src");
     els.fitImage.alt = "Fit visualization is unavailable for the current data freeze";
@@ -2263,15 +2310,30 @@ function bindEvents() {
 
 async function init() {
   syncDocumentThemeColor();
-  const dataUrl = new URL("./data/dashboard_data_20260616.json", window.location.href);
-  dataUrl.searchParams.set("v", "20260901-editorial");
+  const dataUrl = new URL("./data/dashboard_data_v7.json", window.location.href);
+  dataUrl.searchParams.set("v", "20260909-mean");
   dataUrl.searchParams.set("t", String(Date.now()));
-  const response = await fetch(dataUrl, { cache: "no-store" });
-  if (!response.ok) throw new Error(`Failed to load ${dataUrl.pathname}: ${response.status}`);
-  state.data = await response.json();
+  if (window.location.protocol === "file:") {
+    await new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = "./data/dashboard_data_v7.js";
+      script.onload = resolve;
+      script.onerror = () => reject(new Error("Failed to load the local v7 data bundle"));
+      document.head.appendChild(script);
+    });
+    state.data = window.META_EVAL_DATA;
+  } else {
+    const response = await fetch(dataUrl, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Failed to load ${dataUrl.pathname}: ${response.status}`);
+    state.data = await response.json();
+  }
   populateControls();
   bindEvents();
+  els.tagCards.addEventListener("click", (event) => {
+    if (event.target.closest(".tag-examples-retry")) loadTagExamples();
+  });
   renderRunDependentViews();
+  loadTagExamples();
 }
 
 init().catch((error) => {

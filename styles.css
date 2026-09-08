@@ -3301,6 +3301,62 @@ tr.selectable.active {
   padding: 0;
 }
 
+.tag-examples-scope {
+  max-width: 720px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.tag-examples {
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.tag-examples h4 { margin: 0; font-size: 13px; color: var(--ink); }
+.tag-examples .tag-example-meta { margin: 6px 0 16px; font-size: 10px; color: var(--muted); }
+.tag-examples ol { margin: 0; padding: 0; list-style: none; }
+.tag-examples li + li { margin-top: 18px; padding-top: 16px; border-top: 1px dotted var(--line); }
+.tag-example-heading { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; font-size: 10px; }
+.tag-example-heading span { overflow-wrap: anywhere; color: var(--muted); }
+.tag-example-heading strong { white-space: nowrap; font-size: 12px; }
+#tagsView .tag-examples .tag-example-preview { color: var(--ink); font-size: 12px; line-height: 1.65; overflow-wrap: anywhere; }
+#tagsView .tag-examples .tag-example-rationale { color: var(--muted); font-size: 11px; line-height: 1.65; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.tag-example-link, .tag-examples-retry { color: var(--accent-dark); font-size: 11px; text-decoration: underline; text-underline-offset: 4px; }
+.tag-example-link:focus-visible, .tag-examples-retry:focus-visible { outline: 2px solid var(--accent-dark); outline-offset: 5px; }
+.tag-card[id] { scroll-margin-top: 90px; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+body.item-page { overflow: auto; height: auto; }
+.item-shell { max-width: 980px; margin: 0 auto; padding: 48px 32px 80px; }
+.item-header { margin-top: 36px; padding-bottom: 28px; border-bottom: 1px solid var(--ink); }
+.item-eyebrow { font-size: 12px; color: var(--accent-dark); }
+.item-header h1 { font-family: Georgia, "Times New Roman", serif; font-size: clamp(26px, 5vw, 44px); font-weight: 400; overflow-wrap: anywhere; }
+.item-source-id { font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+.item-score { display: flex; gap: 18px; align-items: center; margin: 24px 0; }
+.item-score strong { font-family: Georgia, serif; font-size: 32px; }
+.item-score span { font-size: 12px; color: var(--muted); }
+.item-rationale { line-height: 1.8; }
+.item-question, .item-provenance { margin-top: 32px; }
+.item-shell h2 { font-family: Georgia, serif; font-weight: 400; font-size: 24px; }
+.item-shell pre { white-space: pre-wrap; overflow-wrap: anywhere; font-family: inherit; font-size: 15px; line-height: 1.9; }
+.item-provenance { border-top: 1px solid var(--line); padding-top: 16px; }
+.item-provenance dl div { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 16px; margin: 12px 0; font-size: 12px; }
+.item-provenance dt, .item-provenance > p { color: var(--muted); }
+.item-provenance dd { margin: 0; overflow-wrap: anywhere; }
+.item-provenance > p { font-size: 12px; line-height: 1.7; }
+.item-provenance details { border-top: 1px solid var(--line); margin-top: 20px; padding-top: 20px; }
+.item-provenance summary { cursor: pointer; font-size: 13px; line-height: 1.7; }
+.item-annotations article { padding: 12px 0; border-bottom: 1px solid var(--line); }
+.item-annotations h3 { font-size: 14px; }
+.item-annotations h3 span { float: right; }
+.item-annotations p { font-size: 13px; line-height: 1.8; }
+@media (max-width: 600px) {
+  .item-shell { padding: 28px 20px 48px; }
+  .item-provenance dl div { grid-template-columns: 1fr; gap: 4px; }
+}
+
 .tag-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -3754,3 +3810,7 @@ tr.selectable.active {
     width: min(100vw - 72px, 1380px);
   }
 }
+
+.tag-more-items { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 14px; }
+.tag-more-items summary { cursor: pointer; color: var(--accent-dark); font-size: 12px; line-height: 1.6; }
+.tag-more-items[open] summary { margin-bottom: 18px; }
