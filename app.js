@@ -7,7 +7,7 @@ const state = {
   selectedRunTag: null,
   selectedFamily: "All",
   timelineViewMode: "models",
-  benchmarkTimelineMetric: "difficulty_b_scaled",
+  benchmarkTimelineMetric: "difficulty_b",
   timelinePoints: [],
   timelineSearchSelection: null,
   timelinePreviousFamily: "All",
@@ -31,7 +31,6 @@ const TIMELINE_AXIS_LABEL = "Mean latent ability";
 const TIMELINE_PERCENTILE_LABEL = "Ability percentile";
 const TIMELINE_SCORE_DIGITS = 3;
 const BENCHMARK_DIFFICULTY_METRICS = {
-  difficulty_b_scaled: { label: "Difficulty × scale", shortLabel: "b × scale" },
   difficulty_b: { label: "Difficulty b", shortLabel: "b" },
   difficulty_score: { label: "Predicted difficulty", shortLabel: "1 - mean predicted score" },
   difficulty_weight: { label: "Difficulty weight", shortLabel: "ranking weight" },
@@ -305,13 +304,12 @@ function renderSortOptions() {
     .map((dim, index) => `<option value="dim:${index}">${dim}</option>`)
     .join("");
   const modelSort = els.modelSort.value || "timeline_rank";
-  const benchmarkSort = els.benchmarkSort.value || "difficulty_b_scaled";
+  const benchmarkSort = els.benchmarkSort.value || "difficulty_b";
   els.modelSort.innerHTML = `
     <option value="timeline_rank">Rank</option>
     ${dimOptions}
   `;
   els.benchmarkSort.innerHTML = `
-    <option value="difficulty_b_scaled">Difficulty × scale</option>
     <option value="difficulty_b">Difficulty b</option>
     <option value="difficulty_score">Predicted difficulty</option>
     <option value="difficulty_weight">Difficulty weight</option>
@@ -320,7 +318,7 @@ function renderSortOptions() {
   els.modelSort.value = [...els.modelSort.options].some((option) => option.value === modelSort) ? modelSort : "timeline_rank";
   els.benchmarkSort.value = [...els.benchmarkSort.options].some((option) => option.value === benchmarkSort)
     ? benchmarkSort
-    : "difficulty_b_scaled";
+    : "difficulty_b";
 }
 
 function renderHeatmapSortOptions() {
@@ -972,7 +970,6 @@ function benchmarkTimelineData() {
       difficulty_sum: bench.difficulty_sum,
       difficulty_weighted: bench.difficulty_weighted,
       difficulty_b: bench.difficulty_b,
-      difficulty_b_scaled: bench.difficulty_b_scaled,
       difficulty_weight: bench.difficulty_weight,
       difficulty_mean: bench.difficulty_mean,
       difficulty_l2: bench.difficulty_l2,
@@ -1009,7 +1006,7 @@ function attachTimelineDisplayScores(points) {
 
 function benchmarkTimelineMetric() {
   const key = state.benchmarkTimelineMetric;
-  return BENCHMARK_DIFFICULTY_METRICS[key] ? key : "difficulty_b_scaled";
+  return BENCHMARK_DIFFICULTY_METRICS[key] ? key : "difficulty_b";
 }
 
 function benchmarkTimelineMetricLabel() {
